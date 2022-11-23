@@ -1,0 +1,9 @@
+{
+  "name": "tutorium-meeting",
+  "version": "0.1.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.9.3"
+  }
+}
