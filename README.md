@@ -1,5 +1,5 @@
 # Tutorium
-Code base of Tutorium.
+Codebase of Tutorium.
 
 ### For more information
 [Website](https://thetutorium.github.io)  
@@ -9,4 +9,7 @@ Code base of Tutorium.
 Coming Soon
 
 ## Frontend
+Coming Soon
+
+## Meeting Component
 Coming Soon
