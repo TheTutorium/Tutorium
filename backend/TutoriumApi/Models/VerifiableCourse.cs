@@ -1,7 +1,7 @@
 namespace tutorium.Models
 {
-    public class VerifableCourse: Course 
-    {   
+    public class VerifableCourse : Course
+    {
         // Attributes
         public string? DocumentPath { get; set; }
         public bool VerifiedStatus { get; set; }

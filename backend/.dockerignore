@@ -2,6 +2,7 @@
 */obj/
 */out/
 */TestResults/
+*/publish/
 
 */.vscode/
 .DS_Store

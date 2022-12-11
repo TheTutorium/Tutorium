@@ -1,9 +1,9 @@
 using tutorium.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace tutorium 
+namespace tutorium
 {
-    public class Startup 
+    public class Startup
     {
         public Startup(IConfiguration configuration)
         {
