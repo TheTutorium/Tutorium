@@ -1,10 +1,10 @@
 FROM node:16-alpine AS builder
 WORKDIR /app
 
-COPY tutorium/package.json tutorium/yarn.lock ./
+COPY TutoriumWeb/package.json TutoriumWeb/yarn.lock ./
 RUN yarn
 
-COPY tutorium/. .
+COPY TutoriumWeb/. .
 RUN yarn build
 
 FROM nginx:alpine AS runtime
