@@ -1,0 +1,21 @@
+{
+    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+    "overrides": [
+        {
+            "files": ["**/*.ts?(x)"],
+            "rules": {
+                "eqeqeq": [2, "always", { "null": "ignore" }]
+            }
+        }
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint", "simple-import-sort", "sort-keys-fix"],
+    "root": true,
+    "rules": {
+        "simple-import-sort/exports": "error",
+        "simple-import-sort/imports": "error",
+        "sort-keys-fix/sort-keys-fix": "warn",
+        "sort-vars": "error"
+    }
+}
+

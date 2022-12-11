@@ -1,7 +1,7 @@
 namespace tutorium.Models
 {
-    public class Course 
-    {   
+    public class Course
+    {
         // Primary Key
         public int Id { get; set; }
 

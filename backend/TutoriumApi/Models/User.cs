@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace tutorium.Models 
+namespace tutorium.Models
 {
-    public abstract class User 
+    public abstract class User
     {
         // Primary Key
         public int Id { get; set; }
@@ -18,6 +18,6 @@ namespace tutorium.Models
         public string Phone { get; set; } = null!;
         public string? PhoneVerificationCode { get; set; }
         public bool PhoneVerifiedStatus { get; set; }
-        
+
     }
 }

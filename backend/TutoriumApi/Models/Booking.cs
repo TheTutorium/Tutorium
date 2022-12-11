@@ -1,6 +1,6 @@
 namespace tutorium.Models
 {
-    public class Booking 
+    public class Booking
     {
         // Primary Key
         public int Id { get; set; }
@@ -11,7 +11,7 @@ namespace tutorium.Models
 
         // One-to-Many
         public ICollection<WhiteboardSave> WhiteboardSaves { get; set; } = null!;
-        
+
         // Foreing Keys
         public Course AffilatedCourse { get; set; } = null!;
         public int AffilatedCourseId { get; set; }

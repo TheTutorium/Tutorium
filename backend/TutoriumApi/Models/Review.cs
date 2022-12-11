@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace tutorium.Models
 {
     public class Review
-    {   
+    {
         // Primary Key
         public int Id { get; set; }
 

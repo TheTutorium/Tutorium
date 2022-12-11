@@ -2,7 +2,7 @@ namespace tutorium.Models
 {
     public class Tutor : User
     {
-        public string Description { get; set; } = null!;        
+        public string Description { get; set; } = null!;
         public string? ImagePath { get; set; }
 
         // One-to-Many

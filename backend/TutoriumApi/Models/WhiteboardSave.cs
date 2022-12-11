@@ -1,7 +1,7 @@
 namespace tutorium.Models
 {
-    public class WhiteboardSave 
-    {   
+    public class WhiteboardSave
+    {
         // Primary Key
         public int Id { get; set; }
 
