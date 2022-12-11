@@ -2,6 +2,7 @@
   "name": "tutorium-web",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -32,17 +33,17 @@
     "typescript": "^4.9.4"
   },
   "scripts": {
-    "beautify": "yarn run style:write; yarn run lint:write;  yarn run prettier:write",
+    "beautify": "yarn run style:write && yarn run lint:write && yarn run prettier:write",
     "build": "react-scripts build",
-    "checks": "yarn run style:check; yarn run lint:check; yarn run prettier:check",
+    "checks": "yarn run style:check && yarn run lint:check && yarn run prettier:check",
     "eject": "react-scripts eject",
-    "lint:check": "eslint -c .eslintrc 'src/**/*.{tsx,ts}'",
-    "lint:write": "eslint --fix -c .eslintrc 'src/**/*.{tsx,ts}'",
-    "prettier:check": "prettier -l '{,!(node_modules|lib|dist|build)/**/}*.{js,jsx,ts,tsx,json,css,md}'",
-    "prettier:write": "prettier -w '{,!(node_modules|lib|dist|build)/**/}*.{js,jsx,ts,tsx,json,css,md}'",
+    "lint:check": "eslint -c .eslintrc \"src/**/*.{tsx,ts}\"",
+    "lint:write": "eslint --fix -c .eslintrc \"src/**/*.{tsx,ts}\"",
+    "prettier:check": "prettier -l \"{,!(node_modules|lib|dist|build)/**/}*.{js,jsx,ts,tsx,json,css,md}\"",
+    "prettier:write": "prettier -w \"{,!(node_modules|lib|dist|build)/**/}*.{js,jsx,ts,tsx,json,css,md}\"",
     "start": "react-scripts start",
-    "style:check": "stylelint 'src/**/*.css'",
-    "style:write": "stylelint --fix 'src/**/*.css'",
+    "style:check": "stylelint \"src/**/*.css\"",
+    "style:write": "stylelint --fix \"src/**/*.css\"",
     "test": "react-scripts test"
   },
   "eslintConfig": {
