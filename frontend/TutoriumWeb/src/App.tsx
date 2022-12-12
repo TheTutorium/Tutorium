@@ -5,8 +5,6 @@ import React from "react";
 import logo from "./logo.svg";
 
 function App() {
-    console.log("asd");
-
     return (
         <div className="App">
             <header className="App-header">

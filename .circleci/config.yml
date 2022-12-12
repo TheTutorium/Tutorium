@@ -1,108 +1,55 @@
 version: 2.1
 
 jobs:
-  build-backend:
-    description: Build backend component
-    docker:
-      - image: circleci/
+  build-backend-docker-image:
+    machine:
+      image: ubuntu-2004:current
+    resource_class: medium
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - dotnet-packages-v1-{{ checksum "SimpleCalc/SimpleCalc.csproj" }}
-      - run:
-          name: "Install project dependencies"
-          command: dotnet.exe restore
-  build-frontend:
-    docker:
-      - image: cimg/base:stable
+      - run: cd backend && docker build . -t tutorium-backend:latest
+  build-frontend-docker-image:
+    machine:
+      image: ubuntu-2004:current
+    resource_class: medium
     steps:
       - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-  build-meeting:
+      - run: cd frontend && docker build . -t tutorium-frontend:latest
+  lint-check-backend:
     docker:
-      - image: cimg/base:stable
+      - image: mcr.microsoft.com/dotnet/sdk:7.0-alpine
+    resource_class: medium
     steps:
       - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-  deploy-backend:
+      - run: cd backend/TutoriumApi && dotnet restore
+      - run: cd backend/TutoriumApi && dotnet format --verify-no-changes
+  lint-check-frontend:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/node:16.18
+    resource_class: medium
     steps:
       - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-  deploy-frontend:
+      - run: cd frontend/TutoriumWeb && yarn
+      - run: cd frontend/TutoriumWeb && yarn checks
+  lint-check-meeting:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/node:16.18
+    resource_class: medium
     steps:
       - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-  deploy-meeting:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-  lint-backend:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-  lint-frontend:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-  lint-meeting:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-  test-backend:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-  test-frontend:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-  test-meeting:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+      - run: cd meeting/TutoriumMeeting && yarn
+      - run: cd meeting/TutoriumMeeting && yarn checks
 
 workflows:
-  say-hello-workflow:
+  lint-and-deploy:
     jobs:
-      - say-hello
+      - lint-check-backend
+      - lint-check-frontend
+      - lint-check-meeting
+      - build-backend-docker-image:
+          requires:
+            - lint-check-backend
+      - build-frontend-docker-image:
+          requires:
+            - lint-check-frontend
+      
