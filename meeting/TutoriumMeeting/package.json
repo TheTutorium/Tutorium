@@ -9,6 +9,8 @@
   "dependencies": {
     "@pixi/core": "^7.0.4",
     "@pixi/graphics": "^7.0.4",
+    "express": "^4.18.2",
+    "peer": "^0.6.1",
     "peerjs": "^1.4.7"
   }
 }
