@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@pixi/core": "^7.0.4",
-    "@pixi/graphics": "^7.0.4"
+    "@pixi/graphics": "^7.0.4",
+    "peerjs": "^1.4.7"
   }
 }
