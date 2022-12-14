@@ -13,7 +13,7 @@ const PORT = 3000;
 
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
-app.use('/scripts', express.static(__dirname + '/node_modules/peerjs/dist/'));
+app.use('/scripts', express.static(__dirname + '/node_modules'));
 app.use(express.static(__dirname + '/src'));
 app.use('/public', express.static(__dirname + '/public'));
 //app.use(express.static("src"));
@@ -36,3 +36,11 @@ const peerServer = ExpressPeerServer(listener, {
 });
 
 app.use('/peerjs', peerServer);
+
+
+
+// Whiteboard Part
+
+
+
+

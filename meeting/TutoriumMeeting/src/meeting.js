@@ -1,8 +1,4 @@
 
-//import { Peer } from "peerjs";
-//const { Peer } = require("peerjs");
-//const peer = new Peer("asd");
-
 let Peer = window.Peer;
 
 
