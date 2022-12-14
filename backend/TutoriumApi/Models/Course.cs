@@ -8,8 +8,13 @@ namespace tutorium.Models
         // Attributes
         public string Description { get; set; } = null!;
         public int Duration { get; set; }  // In minutes
-        public string Name { get; set; } = null!;
+        public string Name { get; set; } = null!;  // If course is verifable then it names must be from 'VerifableCourseTypes'
         public SubjectType Subject { get; set; }
+
+        // Verifiable Course Attributes
+        public string? DocumentPath { get; set; }
+        public DateTime? ExpirationDate { get; set; }
+        public VerifiedStatusType VerifiedStatus { get; set; }
 
         // One-to-Many
         public ICollection<Booking> Bookings { get; set; } = null!;
@@ -21,20 +26,23 @@ namespace tutorium.Models
         public int AffilatedTutorId { get; set; }
     }
 
+    public enum VerifiedStatusType
+    {
+        NotVerifable,
+        NotVerified,
+        InProcess,
+        Verified
+    }
+
     public enum SubjectType
     {
-        Biology,
-        Chemistry,
-        Coding,
         English,
-        Geography,
-        History,
         Mathematics,
-        Philosophy,
-        Physics,
-        ReligionCulture,
-        Turkish,
-        TurkishLiterature,
         Other,
+    }
+
+    static class VerifableCourseTypes
+    {
+        public const string YKS = "YKS";
     }
 }

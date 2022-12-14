@@ -12,7 +12,7 @@ using tutorium.Data;
 namespace TutoriumApi.Migrations
 {
     [DbContext(typeof(TutoriumContext))]
-    [Migration("20221211150625_InitialCreation")]
+    [Migration("20221214124514_InitialCreation")]
     partial class InitialCreation
     {
         /// <inheritdoc />
@@ -45,6 +45,9 @@ namespace TutoriumApi.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<int>("Duration")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AffilatedCourseId");
@@ -59,28 +62,32 @@ namespace TutoriumApi.Migrations
                             Id = 1,
                             AffilatedCourseId = 1,
                             AffilatedStudentId = 1,
-                            Date = new DateTime(2023, 2, 15, 17, 0, 0, 0, DateTimeKind.Unspecified)
+                            Date = new DateTime(2023, 2, 15, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            Duration = 60
                         },
                         new
                         {
                             Id = 2,
                             AffilatedCourseId = 2,
                             AffilatedStudentId = 2,
-                            Date = new DateTime(2023, 1, 15, 8, 0, 0, 0, DateTimeKind.Unspecified)
+                            Date = new DateTime(2023, 1, 15, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            Duration = 90
                         },
                         new
                         {
                             Id = 3,
                             AffilatedCourseId = 2,
                             AffilatedStudentId = 2,
-                            Date = new DateTime(2023, 1, 20, 10, 0, 0, 0, DateTimeKind.Unspecified)
+                            Date = new DateTime(2023, 1, 20, 10, 0, 0, 0, DateTimeKind.Unspecified),
+                            Duration = 90
                         },
                         new
                         {
                             Id = 4,
-                            AffilatedCourseId = 4,
+                            AffilatedCourseId = 3,
                             AffilatedStudentId = 3,
-                            Date = new DateTime(2023, 3, 30, 7, 0, 0, 0, DateTimeKind.Unspecified)
+                            Date = new DateTime(2023, 3, 30, 7, 0, 0, 0, DateTimeKind.Unspecified),
+                            Duration = 30
                         });
                 });
 
@@ -99,12 +106,14 @@ namespace TutoriumApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
+                    b.Property<string>("DocumentPath")
                         .HasColumnType("text");
 
                     b.Property<int>("Duration")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -113,15 +122,14 @@ namespace TutoriumApi.Migrations
                     b.Property<int>("Subject")
                         .HasColumnType("integer");
 
+                    b.Property<int>("VerifiedStatus")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AffilatedTutorId");
 
                     b.ToTable("Courses");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Course");
-
-                    b.UseTphMappingStrategy();
 
                     b.HasData(
                         new
@@ -131,25 +139,32 @@ namespace TutoriumApi.Migrations
                             Description = "MAT101 Veriyorum",
                             Duration = 60,
                             Name = "MAT101",
-                            Subject = 6
+                            Subject = 1,
+                            VerifiedStatus = 0
                         },
                         new
                         {
                             Id = 2,
                             AffilatedTutorId = 4,
                             Description = "TOEFL Veriyorum",
+                            DocumentPath = "/fake/path",
                             Duration = 90,
+                            ExpirationDate = new DateTime(2023, 2, 15, 17, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "TOEFL",
-                            Subject = 3
+                            Subject = 0,
+                            VerifiedStatus = 1
                         },
                         new
                         {
                             Id = 3,
                             AffilatedTutorId = 4,
                             Description = "GRE Veriyorum",
+                            DocumentPath = "/fake/path",
                             Duration = 30,
+                            ExpirationDate = new DateTime(2023, 3, 15, 17, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "GRE",
-                            Subject = 3
+                            Subject = 0,
+                            VerifiedStatus = 3
                         });
                 });
 
@@ -213,6 +228,9 @@ namespace TutoriumApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<decimal>("Rating")
                         .HasColumnType("decimal(2, 1)");
 
@@ -231,6 +249,7 @@ namespace TutoriumApi.Migrations
                             AffilatedCourseId = 1,
                             AffilatedStudentId = 1,
                             Comment = "Kotu",
+                            Date = new DateTime(2023, 3, 30, 7, 0, 0, 0, DateTimeKind.Unspecified),
                             Rating = 9.8m
                         },
                         new
@@ -239,6 +258,7 @@ namespace TutoriumApi.Migrations
                             AffilatedCourseId = 2,
                             AffilatedStudentId = 1,
                             Comment = "Iyi",
+                            Date = new DateTime(2023, 4, 30, 7, 0, 0, 0, DateTimeKind.Unspecified),
                             Rating = 6.8m
                         },
                         new
@@ -247,6 +267,7 @@ namespace TutoriumApi.Migrations
                             AffilatedCourseId = 2,
                             AffilatedStudentId = 3,
                             Comment = "Vasat",
+                            Date = new DateTime(2023, 5, 30, 7, 0, 0, 0, DateTimeKind.Unspecified),
                             Rating = 4.8m
                         });
                 });
@@ -319,7 +340,7 @@ namespace TutoriumApi.Migrations
                     b.Property<int>("AffilatedBookingId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("ImagePath")
+                    b.Property<string>("SavePath")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -337,58 +358,22 @@ namespace TutoriumApi.Migrations
                         {
                             Id = 1,
                             AffilatedBookingId = 1,
-                            ImagePath = "/File/Path/Fake",
+                            SavePath = "/File/Path/Fake",
                             SaveTime = new DateTime(2023, 3, 30, 7, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = 2,
                             AffilatedBookingId = 3,
-                            ImagePath = "/File/Path/Fake",
+                            SavePath = "/File/Path/Fake",
                             SaveTime = new DateTime(2023, 3, 30, 7, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = 3,
                             AffilatedBookingId = 3,
-                            ImagePath = "/File/Path/Fake",
+                            SavePath = "/File/Path/Fake",
                             SaveTime = new DateTime(2023, 3, 30, 7, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
-                });
-
-            modelBuilder.Entity("tutorium.Models.VerifableCourse", b =>
-                {
-                    b.HasBaseType("tutorium.Models.Course");
-
-                    b.Property<string>("DocumentPath")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("VerifiedStatus")
-                        .HasColumnType("boolean");
-
-                    b.HasDiscriminator().HasValue("VerifableCourse");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 4,
-                            AffilatedTutorId = 5,
-                            Description = "YKS Mat Veriyorum",
-                            Duration = 45,
-                            Name = "YKS",
-                            Subject = 6,
-                            VerifiedStatus = false
-                        },
-                        new
-                        {
-                            Id = 5,
-                            AffilatedTutorId = 5,
-                            Description = "YKS Fizik Veriyorum",
-                            Duration = 45,
-                            Name = "YKS",
-                            Subject = 8,
-                            DocumentPath = "/File/Path/Fake",
-                            VerifiedStatus = false
                         });
                 });
 
@@ -406,8 +391,8 @@ namespace TutoriumApi.Migrations
                             EmailVerifiedStatus = true,
                             FirstName = "Baris Ogun",
                             LastName = "Yoruk",
-                            PasswordHash = new byte[] { 224, 245, 232, 129, 98, 114, 202, 238, 157, 60, 11, 63, 186, 24, 175, 189, 247, 87, 35, 81, 66, 73, 21, 254, 150, 39, 193, 143, 8, 20, 20, 158, 232, 63, 227, 138, 148, 40, 81, 98, 0, 73, 201, 133, 195, 229, 230, 76, 54, 29, 217, 43, 184, 244, 136, 134, 183, 149, 92, 163, 101, 58, 66, 180 },
-                            PasswordSalt = new byte[] { 191, 9, 213, 80, 243, 112, 51, 218, 229, 187, 71, 50, 152, 106, 31, 128, 36, 130, 126, 215, 73, 74, 121, 47, 110, 217, 199, 15, 165, 28, 239, 11, 146, 177, 92, 28, 125, 138, 93, 139, 111, 181, 214, 216, 97, 202, 204, 125, 189, 177, 65, 230, 101, 238, 185, 182, 36, 84, 2, 45, 56, 198, 92, 74, 96, 137, 21, 63, 121, 106, 151, 88, 105, 213, 158, 160, 67, 108, 4, 136, 192, 32, 4, 85, 227, 61, 119, 197, 41, 0, 247, 214, 167, 169, 80, 17, 63, 194, 140, 225, 240, 170, 146, 227, 155, 129, 118, 55, 142, 79, 255, 6, 198, 17, 48, 60, 254, 171, 122, 168, 129, 226, 151, 196, 241, 15, 63, 200 },
+                            PasswordHash = new byte[] { 28, 119, 117, 132, 98, 110, 59, 77, 5, 58, 215, 171, 59, 16, 255, 69, 211, 89, 49, 182, 173, 1, 148, 11, 225, 83, 250, 122, 124, 225, 217, 207, 29, 197, 96, 200, 232, 40, 165, 223, 241, 84, 27, 194, 172, 127, 153, 34, 111, 229, 70, 17, 207, 118, 169, 84, 145, 23, 94, 120, 47, 56, 104, 68 },
+                            PasswordSalt = new byte[] { 110, 11, 203, 181, 227, 124, 93, 215, 5, 186, 224, 221, 168, 181, 23, 44, 236, 48, 232, 0, 199, 169, 96, 16, 55, 84, 202, 196, 140, 159, 114, 53, 94, 196, 63, 78, 39, 170, 217, 116, 223, 79, 67, 107, 78, 120, 147, 90, 21, 247, 92, 188, 76, 37, 189, 157, 23, 181, 57, 213, 77, 92, 116, 178, 133, 240, 105, 183, 50, 38, 11, 29, 67, 105, 151, 158, 32, 192, 72, 76, 26, 93, 162, 205, 81, 187, 158, 68, 73, 190, 250, 109, 84, 114, 3, 24, 132, 37, 71, 196, 104, 225, 200, 238, 148, 36, 234, 79, 137, 42, 49, 145, 117, 42, 94, 5, 61, 158, 51, 34, 56, 141, 88, 90, 167, 208, 48, 9 },
                             Phone = "00905075711001",
                             PhoneVerifiedStatus = true
                         },
@@ -418,8 +403,8 @@ namespace TutoriumApi.Migrations
                             EmailVerifiedStatus = true,
                             FirstName = "Mustafa Cagri",
                             LastName = "Durgut",
-                            PasswordHash = new byte[] { 224, 245, 232, 129, 98, 114, 202, 238, 157, 60, 11, 63, 186, 24, 175, 189, 247, 87, 35, 81, 66, 73, 21, 254, 150, 39, 193, 143, 8, 20, 20, 158, 232, 63, 227, 138, 148, 40, 81, 98, 0, 73, 201, 133, 195, 229, 230, 76, 54, 29, 217, 43, 184, 244, 136, 134, 183, 149, 92, 163, 101, 58, 66, 180 },
-                            PasswordSalt = new byte[] { 191, 9, 213, 80, 243, 112, 51, 218, 229, 187, 71, 50, 152, 106, 31, 128, 36, 130, 126, 215, 73, 74, 121, 47, 110, 217, 199, 15, 165, 28, 239, 11, 146, 177, 92, 28, 125, 138, 93, 139, 111, 181, 214, 216, 97, 202, 204, 125, 189, 177, 65, 230, 101, 238, 185, 182, 36, 84, 2, 45, 56, 198, 92, 74, 96, 137, 21, 63, 121, 106, 151, 88, 105, 213, 158, 160, 67, 108, 4, 136, 192, 32, 4, 85, 227, 61, 119, 197, 41, 0, 247, 214, 167, 169, 80, 17, 63, 194, 140, 225, 240, 170, 146, 227, 155, 129, 118, 55, 142, 79, 255, 6, 198, 17, 48, 60, 254, 171, 122, 168, 129, 226, 151, 196, 241, 15, 63, 200 },
+                            PasswordHash = new byte[] { 28, 119, 117, 132, 98, 110, 59, 77, 5, 58, 215, 171, 59, 16, 255, 69, 211, 89, 49, 182, 173, 1, 148, 11, 225, 83, 250, 122, 124, 225, 217, 207, 29, 197, 96, 200, 232, 40, 165, 223, 241, 84, 27, 194, 172, 127, 153, 34, 111, 229, 70, 17, 207, 118, 169, 84, 145, 23, 94, 120, 47, 56, 104, 68 },
+                            PasswordSalt = new byte[] { 110, 11, 203, 181, 227, 124, 93, 215, 5, 186, 224, 221, 168, 181, 23, 44, 236, 48, 232, 0, 199, 169, 96, 16, 55, 84, 202, 196, 140, 159, 114, 53, 94, 196, 63, 78, 39, 170, 217, 116, 223, 79, 67, 107, 78, 120, 147, 90, 21, 247, 92, 188, 76, 37, 189, 157, 23, 181, 57, 213, 77, 92, 116, 178, 133, 240, 105, 183, 50, 38, 11, 29, 67, 105, 151, 158, 32, 192, 72, 76, 26, 93, 162, 205, 81, 187, 158, 68, 73, 190, 250, 109, 84, 114, 3, 24, 132, 37, 71, 196, 104, 225, 200, 238, 148, 36, 234, 79, 137, 42, 49, 145, 117, 42, 94, 5, 61, 158, 51, 34, 56, 141, 88, 90, 167, 208, 48, 9 },
                             Phone = "0000000000000",
                             PhoneVerifiedStatus = true
                         },
@@ -431,8 +416,8 @@ namespace TutoriumApi.Migrations
                             EmailVerifiedStatus = false,
                             FirstName = "Oguzhan",
                             LastName = "Ozcelik",
-                            PasswordHash = new byte[] { 224, 245, 232, 129, 98, 114, 202, 238, 157, 60, 11, 63, 186, 24, 175, 189, 247, 87, 35, 81, 66, 73, 21, 254, 150, 39, 193, 143, 8, 20, 20, 158, 232, 63, 227, 138, 148, 40, 81, 98, 0, 73, 201, 133, 195, 229, 230, 76, 54, 29, 217, 43, 184, 244, 136, 134, 183, 149, 92, 163, 101, 58, 66, 180 },
-                            PasswordSalt = new byte[] { 191, 9, 213, 80, 243, 112, 51, 218, 229, 187, 71, 50, 152, 106, 31, 128, 36, 130, 126, 215, 73, 74, 121, 47, 110, 217, 199, 15, 165, 28, 239, 11, 146, 177, 92, 28, 125, 138, 93, 139, 111, 181, 214, 216, 97, 202, 204, 125, 189, 177, 65, 230, 101, 238, 185, 182, 36, 84, 2, 45, 56, 198, 92, 74, 96, 137, 21, 63, 121, 106, 151, 88, 105, 213, 158, 160, 67, 108, 4, 136, 192, 32, 4, 85, 227, 61, 119, 197, 41, 0, 247, 214, 167, 169, 80, 17, 63, 194, 140, 225, 240, 170, 146, 227, 155, 129, 118, 55, 142, 79, 255, 6, 198, 17, 48, 60, 254, 171, 122, 168, 129, 226, 151, 196, 241, 15, 63, 200 },
+                            PasswordHash = new byte[] { 28, 119, 117, 132, 98, 110, 59, 77, 5, 58, 215, 171, 59, 16, 255, 69, 211, 89, 49, 182, 173, 1, 148, 11, 225, 83, 250, 122, 124, 225, 217, 207, 29, 197, 96, 200, 232, 40, 165, 223, 241, 84, 27, 194, 172, 127, 153, 34, 111, 229, 70, 17, 207, 118, 169, 84, 145, 23, 94, 120, 47, 56, 104, 68 },
+                            PasswordSalt = new byte[] { 110, 11, 203, 181, 227, 124, 93, 215, 5, 186, 224, 221, 168, 181, 23, 44, 236, 48, 232, 0, 199, 169, 96, 16, 55, 84, 202, 196, 140, 159, 114, 53, 94, 196, 63, 78, 39, 170, 217, 116, 223, 79, 67, 107, 78, 120, 147, 90, 21, 247, 92, 188, 76, 37, 189, 157, 23, 181, 57, 213, 77, 92, 116, 178, 133, 240, 105, 183, 50, 38, 11, 29, 67, 105, 151, 158, 32, 192, 72, 76, 26, 93, 162, 205, 81, 187, 158, 68, 73, 190, 250, 109, 84, 114, 3, 24, 132, 37, 71, 196, 104, 225, 200, 238, 148, 36, 234, 79, 137, 42, 49, 145, 117, 42, 94, 5, 61, 158, 51, 34, 56, 141, 88, 90, 167, 208, 48, 9 },
                             Phone = "0000000000000",
                             PhoneVerifiedStatus = true
                         });
@@ -459,8 +444,8 @@ namespace TutoriumApi.Migrations
                             EmailVerifiedStatus = true,
                             FirstName = "Halil Ozgur",
                             LastName = "Demir",
-                            PasswordHash = new byte[] { 224, 245, 232, 129, 98, 114, 202, 238, 157, 60, 11, 63, 186, 24, 175, 189, 247, 87, 35, 81, 66, 73, 21, 254, 150, 39, 193, 143, 8, 20, 20, 158, 232, 63, 227, 138, 148, 40, 81, 98, 0, 73, 201, 133, 195, 229, 230, 76, 54, 29, 217, 43, 184, 244, 136, 134, 183, 149, 92, 163, 101, 58, 66, 180 },
-                            PasswordSalt = new byte[] { 191, 9, 213, 80, 243, 112, 51, 218, 229, 187, 71, 50, 152, 106, 31, 128, 36, 130, 126, 215, 73, 74, 121, 47, 110, 217, 199, 15, 165, 28, 239, 11, 146, 177, 92, 28, 125, 138, 93, 139, 111, 181, 214, 216, 97, 202, 204, 125, 189, 177, 65, 230, 101, 238, 185, 182, 36, 84, 2, 45, 56, 198, 92, 74, 96, 137, 21, 63, 121, 106, 151, 88, 105, 213, 158, 160, 67, 108, 4, 136, 192, 32, 4, 85, 227, 61, 119, 197, 41, 0, 247, 214, 167, 169, 80, 17, 63, 194, 140, 225, 240, 170, 146, 227, 155, 129, 118, 55, 142, 79, 255, 6, 198, 17, 48, 60, 254, 171, 122, 168, 129, 226, 151, 196, 241, 15, 63, 200 },
+                            PasswordHash = new byte[] { 28, 119, 117, 132, 98, 110, 59, 77, 5, 58, 215, 171, 59, 16, 255, 69, 211, 89, 49, 182, 173, 1, 148, 11, 225, 83, 250, 122, 124, 225, 217, 207, 29, 197, 96, 200, 232, 40, 165, 223, 241, 84, 27, 194, 172, 127, 153, 34, 111, 229, 70, 17, 207, 118, 169, 84, 145, 23, 94, 120, 47, 56, 104, 68 },
+                            PasswordSalt = new byte[] { 110, 11, 203, 181, 227, 124, 93, 215, 5, 186, 224, 221, 168, 181, 23, 44, 236, 48, 232, 0, 199, 169, 96, 16, 55, 84, 202, 196, 140, 159, 114, 53, 94, 196, 63, 78, 39, 170, 217, 116, 223, 79, 67, 107, 78, 120, 147, 90, 21, 247, 92, 188, 76, 37, 189, 157, 23, 181, 57, 213, 77, 92, 116, 178, 133, 240, 105, 183, 50, 38, 11, 29, 67, 105, 151, 158, 32, 192, 72, 76, 26, 93, 162, 205, 81, 187, 158, 68, 73, 190, 250, 109, 84, 114, 3, 24, 132, 37, 71, 196, 104, 225, 200, 238, 148, 36, 234, 79, 137, 42, 49, 145, 117, 42, 94, 5, 61, 158, 51, 34, 56, 141, 88, 90, 167, 208, 48, 9 },
                             Phone = "0000000000000",
                             PhoneVerifiedStatus = true,
                             Description = "Selamlar"
@@ -472,8 +457,8 @@ namespace TutoriumApi.Migrations
                             EmailVerifiedStatus = true,
                             FirstName = "Yusuf Mirac",
                             LastName = "Uyar",
-                            PasswordHash = new byte[] { 224, 245, 232, 129, 98, 114, 202, 238, 157, 60, 11, 63, 186, 24, 175, 189, 247, 87, 35, 81, 66, 73, 21, 254, 150, 39, 193, 143, 8, 20, 20, 158, 232, 63, 227, 138, 148, 40, 81, 98, 0, 73, 201, 133, 195, 229, 230, 76, 54, 29, 217, 43, 184, 244, 136, 134, 183, 149, 92, 163, 101, 58, 66, 180 },
-                            PasswordSalt = new byte[] { 191, 9, 213, 80, 243, 112, 51, 218, 229, 187, 71, 50, 152, 106, 31, 128, 36, 130, 126, 215, 73, 74, 121, 47, 110, 217, 199, 15, 165, 28, 239, 11, 146, 177, 92, 28, 125, 138, 93, 139, 111, 181, 214, 216, 97, 202, 204, 125, 189, 177, 65, 230, 101, 238, 185, 182, 36, 84, 2, 45, 56, 198, 92, 74, 96, 137, 21, 63, 121, 106, 151, 88, 105, 213, 158, 160, 67, 108, 4, 136, 192, 32, 4, 85, 227, 61, 119, 197, 41, 0, 247, 214, 167, 169, 80, 17, 63, 194, 140, 225, 240, 170, 146, 227, 155, 129, 118, 55, 142, 79, 255, 6, 198, 17, 48, 60, 254, 171, 122, 168, 129, 226, 151, 196, 241, 15, 63, 200 },
+                            PasswordHash = new byte[] { 28, 119, 117, 132, 98, 110, 59, 77, 5, 58, 215, 171, 59, 16, 255, 69, 211, 89, 49, 182, 173, 1, 148, 11, 225, 83, 250, 122, 124, 225, 217, 207, 29, 197, 96, 200, 232, 40, 165, 223, 241, 84, 27, 194, 172, 127, 153, 34, 111, 229, 70, 17, 207, 118, 169, 84, 145, 23, 94, 120, 47, 56, 104, 68 },
+                            PasswordSalt = new byte[] { 110, 11, 203, 181, 227, 124, 93, 215, 5, 186, 224, 221, 168, 181, 23, 44, 236, 48, 232, 0, 199, 169, 96, 16, 55, 84, 202, 196, 140, 159, 114, 53, 94, 196, 63, 78, 39, 170, 217, 116, 223, 79, 67, 107, 78, 120, 147, 90, 21, 247, 92, 188, 76, 37, 189, 157, 23, 181, 57, 213, 77, 92, 116, 178, 133, 240, 105, 183, 50, 38, 11, 29, 67, 105, 151, 158, 32, 192, 72, 76, 26, 93, 162, 205, 81, 187, 158, 68, 73, 190, 250, 109, 84, 114, 3, 24, 132, 37, 71, 196, 104, 225, 200, 238, 148, 36, 234, 79, 137, 42, 49, 145, 117, 42, 94, 5, 61, 158, 51, 34, 56, 141, 88, 90, 167, 208, 48, 9 },
                             Phone = "0000000000000",
                             PhoneVerificationCode = "1234",
                             PhoneVerifiedStatus = false,

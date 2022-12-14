@@ -1,5 +1,6 @@
 using tutorium.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 namespace tutorium
 {
@@ -18,9 +19,37 @@ namespace tutorium
         {
             services.AddDbContext<TutoriumContext>(x => x.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
             services.AddControllers();
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            services.AddEndpointsApiExplorer();  // TODO: I do not know what this do.
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v0", new OpenApiInfo { Title = "Tutorium", Version = "v0" });
+                c.AddSecurityDefinition(
+                    "Bearer", new OpenApiSecurityScheme
+                    {
+                        Description = @"JWT Auth",
+                        Name = "Authorization",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.ApiKey,
+                        Scheme = "Bearer"
+                    });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement() {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+                        },
+                        new List<string>()
+                    } });
+            });
 
+            services.AddAutoMapper(typeof(Startup));
             services.AddCors(
                 builder => builder.AddDefaultPolicy(
                      a => a.AllowAnyMethod()

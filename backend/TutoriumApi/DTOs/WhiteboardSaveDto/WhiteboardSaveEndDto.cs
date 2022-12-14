@@ -1,16 +1,12 @@
-namespace tutorium.Models
+namespace tutorium.Dtos.WhiteboardSaveDto
 {
-    public class WhiteboardSave
+    public class WhiteboardSaveEndDto
     {
-        // Primary Key
         public int Id { get; set; }
 
-        // Attributes
         public string SavePath { get; set; } = null!;
         public DateTime SaveTime { get; set; }
 
-        // Foreign Keys
-        public Booking AffilatedBooking { get; set; } = null!;
         public int AffilatedBookingId { get; set; }
     }
 }
