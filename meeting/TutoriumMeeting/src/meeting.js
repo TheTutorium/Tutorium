@@ -6,6 +6,7 @@
 let Peer = window.Peer;
 
 
+
 let messagesEl = document.querySelector('.messages');
 let peerIdEl = document.querySelector('#connect-to-peer');
 let videoEl = document.querySelector('.remote-video');
@@ -23,9 +24,10 @@ let renderVideo = (stream) => {
 // Register with the peer server
 let peer = new Peer({
   host: '/',
+  port: 3000,
   path: '/peerjs/myapp'
 });
-/*  
+
 peer.on('open', (id) => {
   logMessage('My peer ID is: ' + id);
 });
@@ -79,4 +81,4 @@ let connectToPeer = () => {
     });
 };
 
-window.connectToPeer = connectToPeer;*/
+window.connectToPeer = connectToPeer;
