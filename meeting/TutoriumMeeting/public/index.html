@@ -8,14 +8,22 @@
       name="description"
       content="Meeting Component for Tutorium."
     />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="manifest" href="/public/manifest.json" />
     <title>Tutorium Meeting</title>
 
-    <script src="../node_modules/peerjs/dist/peerjs.js"></script>
-    <script src="../src/meeting.js" type="module"></script>
+    <script src="/scripts/peerjs.min.js"></script>
+    <script src="/meeting.js" type="module"></script>
   </head>
   <body>
-    <div id="root"></div>
+    <video class="remote-video" autoplay></video>
+    <input type="text" id="connect-to-peer" />
+    <button onclick="connectToPeer()">
+      Connect
+    </button>
+    
+    <div class="messages">
+      
+    </div>
   </body>
   
 </html>
