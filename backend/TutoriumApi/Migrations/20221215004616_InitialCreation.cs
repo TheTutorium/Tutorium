@@ -49,10 +49,10 @@ namespace TutoriumApi.Migrations
                     Duration = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Subject = table.Column<int>(type: "integer", nullable: false),
-                    AffilatedTutorId = table.Column<int>(type: "integer", nullable: false),
-                    Discriminator = table.Column<string>(type: "text", nullable: false),
                     DocumentPath = table.Column<string>(type: "text", nullable: true),
-                    VerifiedStatus = table.Column<bool>(type: "boolean", nullable: true)
+                    ExpirationDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    VerifiedStatus = table.Column<int>(type: "integer", nullable: false),
+                    AffilatedTutorId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -120,6 +120,7 @@ namespace TutoriumApi.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Comment = table.Column<string>(type: "text", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Rating = table.Column<decimal>(type: "numeric(2,1)", nullable: false),
                     AffilatedCourseId = table.Column<int>(type: "integer", nullable: false),
                     AffilatedStudentId = table.Column<int>(type: "integer", nullable: false)
@@ -147,7 +148,7 @@ namespace TutoriumApi.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ImagePath = table.Column<string>(type: "text", nullable: false),
+                    SavePath = table.Column<string>(type: "text", nullable: false),
                     SaveTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     AffilatedBookingId = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -167,9 +168,9 @@ namespace TutoriumApi.Migrations
                 columns: new[] { "Id", "Discriminator", "Email", "EmailVerificationCode", "EmailVerifiedStatus", "FirstName", "LastName", "PasswordHash", "PasswordSalt", "Phone", "PhoneVerificationCode", "PhoneVerifiedStatus" },
                 values: new object[,]
                 {
-                    { 1, "Student", "baris@student", null, true, "Baris Ogun", "Yoruk", new byte[] { 224, 245, 232, 129, 98, 114, 202, 238, 157, 60, 11, 63, 186, 24, 175, 189, 247, 87, 35, 81, 66, 73, 21, 254, 150, 39, 193, 143, 8, 20, 20, 158, 232, 63, 227, 138, 148, 40, 81, 98, 0, 73, 201, 133, 195, 229, 230, 76, 54, 29, 217, 43, 184, 244, 136, 134, 183, 149, 92, 163, 101, 58, 66, 180 }, new byte[] { 191, 9, 213, 80, 243, 112, 51, 218, 229, 187, 71, 50, 152, 106, 31, 128, 36, 130, 126, 215, 73, 74, 121, 47, 110, 217, 199, 15, 165, 28, 239, 11, 146, 177, 92, 28, 125, 138, 93, 139, 111, 181, 214, 216, 97, 202, 204, 125, 189, 177, 65, 230, 101, 238, 185, 182, 36, 84, 2, 45, 56, 198, 92, 74, 96, 137, 21, 63, 121, 106, 151, 88, 105, 213, 158, 160, 67, 108, 4, 136, 192, 32, 4, 85, 227, 61, 119, 197, 41, 0, 247, 214, 167, 169, 80, 17, 63, 194, 140, 225, 240, 170, 146, 227, 155, 129, 118, 55, 142, 79, 255, 6, 198, 17, 48, 60, 254, 171, 122, 168, 129, 226, 151, 196, 241, 15, 63, 200 }, "00905075711001", null, true },
-                    { 2, "Student", "cagri@student", null, true, "Mustafa Cagri", "Durgut", new byte[] { 224, 245, 232, 129, 98, 114, 202, 238, 157, 60, 11, 63, 186, 24, 175, 189, 247, 87, 35, 81, 66, 73, 21, 254, 150, 39, 193, 143, 8, 20, 20, 158, 232, 63, 227, 138, 148, 40, 81, 98, 0, 73, 201, 133, 195, 229, 230, 76, 54, 29, 217, 43, 184, 244, 136, 134, 183, 149, 92, 163, 101, 58, 66, 180 }, new byte[] { 191, 9, 213, 80, 243, 112, 51, 218, 229, 187, 71, 50, 152, 106, 31, 128, 36, 130, 126, 215, 73, 74, 121, 47, 110, 217, 199, 15, 165, 28, 239, 11, 146, 177, 92, 28, 125, 138, 93, 139, 111, 181, 214, 216, 97, 202, 204, 125, 189, 177, 65, 230, 101, 238, 185, 182, 36, 84, 2, 45, 56, 198, 92, 74, 96, 137, 21, 63, 121, 106, 151, 88, 105, 213, 158, 160, 67, 108, 4, 136, 192, 32, 4, 85, 227, 61, 119, 197, 41, 0, 247, 214, 167, 169, 80, 17, 63, 194, 140, 225, 240, 170, 146, 227, 155, 129, 118, 55, 142, 79, 255, 6, 198, 17, 48, 60, 254, 171, 122, 168, 129, 226, 151, 196, 241, 15, 63, 200 }, "0000000000000", null, true },
-                    { 3, "Student", "oguzhan@student", "1234", false, "Oguzhan", "Ozcelik", new byte[] { 224, 245, 232, 129, 98, 114, 202, 238, 157, 60, 11, 63, 186, 24, 175, 189, 247, 87, 35, 81, 66, 73, 21, 254, 150, 39, 193, 143, 8, 20, 20, 158, 232, 63, 227, 138, 148, 40, 81, 98, 0, 73, 201, 133, 195, 229, 230, 76, 54, 29, 217, 43, 184, 244, 136, 134, 183, 149, 92, 163, 101, 58, 66, 180 }, new byte[] { 191, 9, 213, 80, 243, 112, 51, 218, 229, 187, 71, 50, 152, 106, 31, 128, 36, 130, 126, 215, 73, 74, 121, 47, 110, 217, 199, 15, 165, 28, 239, 11, 146, 177, 92, 28, 125, 138, 93, 139, 111, 181, 214, 216, 97, 202, 204, 125, 189, 177, 65, 230, 101, 238, 185, 182, 36, 84, 2, 45, 56, 198, 92, 74, 96, 137, 21, 63, 121, 106, 151, 88, 105, 213, 158, 160, 67, 108, 4, 136, 192, 32, 4, 85, 227, 61, 119, 197, 41, 0, 247, 214, 167, 169, 80, 17, 63, 194, 140, 225, 240, 170, 146, 227, 155, 129, 118, 55, 142, 79, 255, 6, 198, 17, 48, 60, 254, 171, 122, 168, 129, 226, 151, 196, 241, 15, 63, 200 }, "0000000000000", null, true }
+                    { 1, "Student", "baris@student", null, true, "Baris Ogun", "Yoruk", new byte[] { 46, 120, 221, 209, 203, 75, 128, 21, 122, 10, 215, 126, 23, 197, 112, 37, 105, 148, 9, 1, 30, 116, 108, 233, 82, 65, 0, 44, 200, 145, 155, 191, 68, 57, 68, 228, 1, 107, 83, 86, 161, 162, 82, 55, 202, 82, 170, 221, 0, 61, 203, 11, 199, 0, 16, 13, 64, 85, 21, 236, 9, 51, 247, 212 }, new byte[] { 146, 42, 48, 131, 60, 140, 121, 209, 223, 195, 154, 182, 34, 220, 130, 162, 122, 107, 121, 23, 63, 8, 11, 24, 190, 252, 30, 170, 19, 180, 190, 22, 131, 216, 201, 74, 18, 183, 163, 172, 39, 248, 23, 237, 250, 59, 7, 124, 164, 146, 255, 99, 16, 161, 171, 36, 189, 99, 233, 91, 144, 179, 217, 53, 157, 199, 8, 165, 13, 2, 124, 143, 134, 91, 26, 227, 198, 68, 19, 155, 53, 29, 213, 244, 95, 149, 135, 44, 250, 183, 106, 156, 107, 74, 97, 114, 128, 215, 106, 149, 138, 111, 32, 209, 161, 214, 30, 216, 72, 108, 138, 56, 79, 236, 104, 186, 63, 209, 183, 172, 201, 103, 112, 200, 100, 162, 248, 156 }, "00905075711001", null, true },
+                    { 2, "Student", "cagri@student", null, true, "Mustafa Cagri", "Durgut", new byte[] { 46, 120, 221, 209, 203, 75, 128, 21, 122, 10, 215, 126, 23, 197, 112, 37, 105, 148, 9, 1, 30, 116, 108, 233, 82, 65, 0, 44, 200, 145, 155, 191, 68, 57, 68, 228, 1, 107, 83, 86, 161, 162, 82, 55, 202, 82, 170, 221, 0, 61, 203, 11, 199, 0, 16, 13, 64, 85, 21, 236, 9, 51, 247, 212 }, new byte[] { 146, 42, 48, 131, 60, 140, 121, 209, 223, 195, 154, 182, 34, 220, 130, 162, 122, 107, 121, 23, 63, 8, 11, 24, 190, 252, 30, 170, 19, 180, 190, 22, 131, 216, 201, 74, 18, 183, 163, 172, 39, 248, 23, 237, 250, 59, 7, 124, 164, 146, 255, 99, 16, 161, 171, 36, 189, 99, 233, 91, 144, 179, 217, 53, 157, 199, 8, 165, 13, 2, 124, 143, 134, 91, 26, 227, 198, 68, 19, 155, 53, 29, 213, 244, 95, 149, 135, 44, 250, 183, 106, 156, 107, 74, 97, 114, 128, 215, 106, 149, 138, 111, 32, 209, 161, 214, 30, 216, 72, 108, 138, 56, 79, 236, 104, 186, 63, 209, 183, 172, 201, 103, 112, 200, 100, 162, 248, 156 }, "0000000000000", null, true },
+                    { 3, "Student", "oguzhan@student", "1234", false, "Oguzhan", "Ozcelik", new byte[] { 46, 120, 221, 209, 203, 75, 128, 21, 122, 10, 215, 126, 23, 197, 112, 37, 105, 148, 9, 1, 30, 116, 108, 233, 82, 65, 0, 44, 200, 145, 155, 191, 68, 57, 68, 228, 1, 107, 83, 86, 161, 162, 82, 55, 202, 82, 170, 221, 0, 61, 203, 11, 199, 0, 16, 13, 64, 85, 21, 236, 9, 51, 247, 212 }, new byte[] { 146, 42, 48, 131, 60, 140, 121, 209, 223, 195, 154, 182, 34, 220, 130, 162, 122, 107, 121, 23, 63, 8, 11, 24, 190, 252, 30, 170, 19, 180, 190, 22, 131, 216, 201, 74, 18, 183, 163, 172, 39, 248, 23, 237, 250, 59, 7, 124, 164, 146, 255, 99, 16, 161, 171, 36, 189, 99, 233, 91, 144, 179, 217, 53, 157, 199, 8, 165, 13, 2, 124, 143, 134, 91, 26, 227, 198, 68, 19, 155, 53, 29, 213, 244, 95, 149, 135, 44, 250, 183, 106, 156, 107, 74, 97, 114, 128, 215, 106, 149, 138, 111, 32, 209, 161, 214, 30, 216, 72, 108, 138, 56, 79, 236, 104, 186, 63, 209, 183, 172, 201, 103, 112, 200, 100, 162, 248, 156 }, "0000000000000", null, true }
                 });
 
             migrationBuilder.InsertData(
@@ -177,27 +178,18 @@ namespace TutoriumApi.Migrations
                 columns: new[] { "Id", "Description", "Discriminator", "Email", "EmailVerificationCode", "EmailVerifiedStatus", "FirstName", "ImagePath", "LastName", "PasswordHash", "PasswordSalt", "Phone", "PhoneVerificationCode", "PhoneVerifiedStatus" },
                 values: new object[,]
                 {
-                    { 4, "Selamlar", "Tutor", "ozgur@tutor", null, true, "Halil Ozgur", null, "Demir", new byte[] { 224, 245, 232, 129, 98, 114, 202, 238, 157, 60, 11, 63, 186, 24, 175, 189, 247, 87, 35, 81, 66, 73, 21, 254, 150, 39, 193, 143, 8, 20, 20, 158, 232, 63, 227, 138, 148, 40, 81, 98, 0, 73, 201, 133, 195, 229, 230, 76, 54, 29, 217, 43, 184, 244, 136, 134, 183, 149, 92, 163, 101, 58, 66, 180 }, new byte[] { 191, 9, 213, 80, 243, 112, 51, 218, 229, 187, 71, 50, 152, 106, 31, 128, 36, 130, 126, 215, 73, 74, 121, 47, 110, 217, 199, 15, 165, 28, 239, 11, 146, 177, 92, 28, 125, 138, 93, 139, 111, 181, 214, 216, 97, 202, 204, 125, 189, 177, 65, 230, 101, 238, 185, 182, 36, 84, 2, 45, 56, 198, 92, 74, 96, 137, 21, 63, 121, 106, 151, 88, 105, 213, 158, 160, 67, 108, 4, 136, 192, 32, 4, 85, 227, 61, 119, 197, 41, 0, 247, 214, 167, 169, 80, 17, 63, 194, 140, 225, 240, 170, 146, 227, 155, 129, 118, 55, 142, 79, 255, 6, 198, 17, 48, 60, 254, 171, 122, 168, 129, 226, 151, 196, 241, 15, 63, 200 }, "0000000000000", null, true },
-                    { 5, "Merhaba arkadaslar", "Tutor", "yusuf@tutor", null, true, "Yusuf Mirac", null, "Uyar", new byte[] { 224, 245, 232, 129, 98, 114, 202, 238, 157, 60, 11, 63, 186, 24, 175, 189, 247, 87, 35, 81, 66, 73, 21, 254, 150, 39, 193, 143, 8, 20, 20, 158, 232, 63, 227, 138, 148, 40, 81, 98, 0, 73, 201, 133, 195, 229, 230, 76, 54, 29, 217, 43, 184, 244, 136, 134, 183, 149, 92, 163, 101, 58, 66, 180 }, new byte[] { 191, 9, 213, 80, 243, 112, 51, 218, 229, 187, 71, 50, 152, 106, 31, 128, 36, 130, 126, 215, 73, 74, 121, 47, 110, 217, 199, 15, 165, 28, 239, 11, 146, 177, 92, 28, 125, 138, 93, 139, 111, 181, 214, 216, 97, 202, 204, 125, 189, 177, 65, 230, 101, 238, 185, 182, 36, 84, 2, 45, 56, 198, 92, 74, 96, 137, 21, 63, 121, 106, 151, 88, 105, 213, 158, 160, 67, 108, 4, 136, 192, 32, 4, 85, 227, 61, 119, 197, 41, 0, 247, 214, 167, 169, 80, 17, 63, 194, 140, 225, 240, 170, 146, 227, 155, 129, 118, 55, 142, 79, 255, 6, 198, 17, 48, 60, 254, 171, 122, 168, 129, 226, 151, 196, 241, 15, 63, 200 }, "0000000000000", "1234", false }
+                    { 4, "Selamlar", "Tutor", "ozgur@tutor", null, true, "Halil Ozgur", null, "Demir", new byte[] { 46, 120, 221, 209, 203, 75, 128, 21, 122, 10, 215, 126, 23, 197, 112, 37, 105, 148, 9, 1, 30, 116, 108, 233, 82, 65, 0, 44, 200, 145, 155, 191, 68, 57, 68, 228, 1, 107, 83, 86, 161, 162, 82, 55, 202, 82, 170, 221, 0, 61, 203, 11, 199, 0, 16, 13, 64, 85, 21, 236, 9, 51, 247, 212 }, new byte[] { 146, 42, 48, 131, 60, 140, 121, 209, 223, 195, 154, 182, 34, 220, 130, 162, 122, 107, 121, 23, 63, 8, 11, 24, 190, 252, 30, 170, 19, 180, 190, 22, 131, 216, 201, 74, 18, 183, 163, 172, 39, 248, 23, 237, 250, 59, 7, 124, 164, 146, 255, 99, 16, 161, 171, 36, 189, 99, 233, 91, 144, 179, 217, 53, 157, 199, 8, 165, 13, 2, 124, 143, 134, 91, 26, 227, 198, 68, 19, 155, 53, 29, 213, 244, 95, 149, 135, 44, 250, 183, 106, 156, 107, 74, 97, 114, 128, 215, 106, 149, 138, 111, 32, 209, 161, 214, 30, 216, 72, 108, 138, 56, 79, 236, 104, 186, 63, 209, 183, 172, 201, 103, 112, 200, 100, 162, 248, 156 }, "0000000000000", null, true },
+                    { 5, "Merhaba arkadaslar", "Tutor", "yusuf@tutor", null, true, "Yusuf Mirac", null, "Uyar", new byte[] { 46, 120, 221, 209, 203, 75, 128, 21, 122, 10, 215, 126, 23, 197, 112, 37, 105, 148, 9, 1, 30, 116, 108, 233, 82, 65, 0, 44, 200, 145, 155, 191, 68, 57, 68, 228, 1, 107, 83, 86, 161, 162, 82, 55, 202, 82, 170, 221, 0, 61, 203, 11, 199, 0, 16, 13, 64, 85, 21, 236, 9, 51, 247, 212 }, new byte[] { 146, 42, 48, 131, 60, 140, 121, 209, 223, 195, 154, 182, 34, 220, 130, 162, 122, 107, 121, 23, 63, 8, 11, 24, 190, 252, 30, 170, 19, 180, 190, 22, 131, 216, 201, 74, 18, 183, 163, 172, 39, 248, 23, 237, 250, 59, 7, 124, 164, 146, 255, 99, 16, 161, 171, 36, 189, 99, 233, 91, 144, 179, 217, 53, 157, 199, 8, 165, 13, 2, 124, 143, 134, 91, 26, 227, 198, 68, 19, 155, 53, 29, 213, 244, 95, 149, 135, 44, 250, 183, 106, 156, 107, 74, 97, 114, 128, 215, 106, 149, 138, 111, 32, 209, 161, 214, 30, 216, 72, 108, 138, 56, 79, 236, 104, 186, 63, 209, 183, 172, 201, 103, 112, 200, 100, 162, 248, 156 }, "0000000000000", "1234", false }
                 });
 
             migrationBuilder.InsertData(
                 table: "Courses",
-                columns: new[] { "Id", "AffilatedTutorId", "Description", "Discriminator", "Duration", "Name", "Subject" },
+                columns: new[] { "Id", "AffilatedTutorId", "Description", "DocumentPath", "Duration", "ExpirationDate", "Name", "Subject", "VerifiedStatus" },
                 values: new object[,]
                 {
-                    { 1, 4, "MAT101 Veriyorum", "Course", 60, "MAT101", 6 },
-                    { 2, 4, "TOEFL Veriyorum", "Course", 90, "TOEFL", 3 },
-                    { 3, 4, "GRE Veriyorum", "Course", 30, "GRE", 3 }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Courses",
-                columns: new[] { "Id", "AffilatedTutorId", "Description", "Discriminator", "DocumentPath", "Duration", "Name", "Subject", "VerifiedStatus" },
-                values: new object[,]
-                {
-                    { 4, 5, "YKS Mat Veriyorum", "VerifableCourse", null, 45, "YKS", 6, false },
-                    { 5, 5, "YKS Fizik Veriyorum", "VerifableCourse", "/File/Path/Fake", 45, "YKS", 8, false }
+                    { 1, 4, "MAT101 Veriyorum", null, 60, null, "MAT101", 1, 0 },
+                    { 2, 4, "TOEFL Veriyorum", "/fake/path", 90, new DateTime(2023, 2, 15, 17, 0, 0, 0, DateTimeKind.Unspecified), "TOEFL", 0, 1 },
+                    { 3, 4, "GRE Veriyorum", "/fake/path", 30, new DateTime(2023, 3, 15, 17, 0, 0, 0, DateTimeKind.Unspecified), "GRE", 0, 3 }
                 });
 
             migrationBuilder.InsertData(
@@ -208,7 +200,7 @@ namespace TutoriumApi.Migrations
                     { 1, 1, 1, null, new DateTime(2023, 2, 15, 17, 0, 0, 0, DateTimeKind.Unspecified) },
                     { 2, 2, 2, null, new DateTime(2023, 1, 15, 8, 0, 0, 0, DateTimeKind.Unspecified) },
                     { 3, 2, 2, null, new DateTime(2023, 1, 20, 10, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 4, 4, 3, null, new DateTime(2023, 3, 30, 7, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { 4, 3, 3, null, new DateTime(2023, 3, 30, 7, 0, 0, 0, DateTimeKind.Unspecified) }
                 });
 
             migrationBuilder.InsertData(
@@ -223,17 +215,17 @@ namespace TutoriumApi.Migrations
 
             migrationBuilder.InsertData(
                 table: "Reviews",
-                columns: new[] { "Id", "AffilatedCourseId", "AffilatedStudentId", "Comment", "Rating" },
+                columns: new[] { "Id", "AffilatedCourseId", "AffilatedStudentId", "Comment", "Date", "Rating" },
                 values: new object[,]
                 {
-                    { 1, 1, 1, "Kotu", 9.8m },
-                    { 2, 2, 1, "Iyi", 6.8m },
-                    { 3, 2, 3, "Vasat", 4.8m }
+                    { 1, 1, 1, "Kotu", new DateTime(2023, 3, 30, 7, 0, 0, 0, DateTimeKind.Unspecified), 9.8m },
+                    { 2, 2, 1, "Iyi", new DateTime(2023, 4, 30, 7, 0, 0, 0, DateTimeKind.Unspecified), 6.8m },
+                    { 3, 2, 3, "Vasat", new DateTime(2023, 5, 30, 7, 0, 0, 0, DateTimeKind.Unspecified), 4.8m }
                 });
 
             migrationBuilder.InsertData(
                 table: "WhiteboardSaves",
-                columns: new[] { "Id", "AffilatedBookingId", "ImagePath", "SaveTime" },
+                columns: new[] { "Id", "AffilatedBookingId", "SavePath", "SaveTime" },
                 values: new object[,]
                 {
                     { 1, 1, "/File/Path/Fake", new DateTime(2023, 3, 30, 7, 0, 0, 0, DateTimeKind.Unspecified) },

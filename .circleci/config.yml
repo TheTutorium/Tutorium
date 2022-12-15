@@ -17,7 +17,7 @@ jobs:
       - run: cd frontend && docker build . -t tutorium-frontend:latest
   lint-check-backend:
     docker:
-      - image: mcr.microsoft.com/dotnet/sdk:7.0-alpine
+      - image: mcr.microsoft.com/dotnet/sdk:7.0
     resource_class: medium
     steps:
       - checkout

@@ -16,7 +16,6 @@ namespace tutorium.Data
         public DbSet<Student> Students { get; set; } = null!;
         public DbSet<Tutor> Tutors { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
-        public DbSet<VerifableCourse> VariableCourses { get; set; } = null!;
         public DbSet<WhiteboardSave> WhiteboardSaves { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -102,6 +101,7 @@ namespace tutorium.Data
                     Duration = 60,
                     Name = "MAT101",
                     Subject = SubjectType.Mathematics,
+                    VerifiedStatus = VerifiedStatusType.NotVerifable,
                     AffilatedTutorId = 4
                 },
                 new Course
@@ -111,6 +111,9 @@ namespace tutorium.Data
                     Duration = 90,
                     Name = "TOEFL",
                     Subject = SubjectType.English,
+                    DocumentPath = "/fake/path",
+                    ExpirationDate = new DateTime(2023, 2, 15, 17, 0, 0),
+                    VerifiedStatus = VerifiedStatusType.NotVerified,
                     AffilatedTutorId = 4
                 },
                 new Course
@@ -120,29 +123,10 @@ namespace tutorium.Data
                     Duration = 30,
                     Name = "GRE",
                     Subject = SubjectType.English,
+                    DocumentPath = "/fake/path",
+                    ExpirationDate = new DateTime(2023, 3, 15, 17, 0, 0),
+                    VerifiedStatus = VerifiedStatusType.Verified,
                     AffilatedTutorId = 4
-                }
-            );
-
-            modelBuilder.Entity<VerifableCourse>().HasData(
-                new VerifableCourse
-                {
-                    Id = 4,
-                    Description = "YKS Mat Veriyorum",
-                    Duration = 45,
-                    Name = VerifableCourseTypes.YKS,
-                    Subject = SubjectType.Mathematics,
-                    AffilatedTutorId = 5
-                },
-                new VerifableCourse
-                {
-                    Id = 5,
-                    Description = "YKS Fizik Veriyorum",
-                    DocumentPath = "/File/Path/Fake",
-                    Duration = 45,
-                    Name = VerifableCourseTypes.YKS,
-                    Subject = SubjectType.Physics,
-                    AffilatedTutorId = 5
                 }
             );
 
@@ -193,7 +177,7 @@ namespace tutorium.Data
                 {
                     Id = 4,
                     Date = new DateTime(2023, 3, 30, 7, 0, 0),
-                    AffilatedCourseId = 4,
+                    AffilatedCourseId = 3,
                     AffilatedStudentId = 3,
                 }
             );
@@ -202,21 +186,21 @@ namespace tutorium.Data
                 new WhiteboardSave
                 {
                     Id = 1,
-                    ImagePath = "/File/Path/Fake",
+                    SavePath = "/File/Path/Fake",
                     SaveTime = new DateTime(2023, 3, 30, 7, 0, 0),
                     AffilatedBookingId = 1,
                 },
                 new WhiteboardSave
                 {
                     Id = 2,
-                    ImagePath = "/File/Path/Fake",
+                    SavePath = "/File/Path/Fake",
                     SaveTime = new DateTime(2023, 3, 30, 7, 0, 0),
                     AffilatedBookingId = 3,
                 },
                 new WhiteboardSave
                 {
                     Id = 3,
-                    ImagePath = "/File/Path/Fake",
+                    SavePath = "/File/Path/Fake",
                     SaveTime = new DateTime(2023, 3, 30, 7, 0, 0),
                     AffilatedBookingId = 3,
                 }
@@ -227,6 +211,7 @@ namespace tutorium.Data
                 {
                     Id = 1,
                     Comment = "Kotu",
+                    Date = new DateTime(2023, 3, 30, 7, 0, 0),
                     Rating = 9.8m,
                     AffilatedCourseId = 1,
                     AffilatedStudentId = 1,
@@ -235,6 +220,7 @@ namespace tutorium.Data
                 {
                     Id = 2,
                     Comment = "Iyi",
+                    Date = new DateTime(2023, 4, 30, 7, 0, 0),
                     Rating = 6.8m,
                     AffilatedCourseId = 2,
                     AffilatedStudentId = 1,
@@ -243,6 +229,7 @@ namespace tutorium.Data
                 {
                     Id = 3,
                     Comment = "Vasat",
+                    Date = new DateTime(2023, 5, 30, 7, 0, 0),
                     Rating = 4.8m,
                     AffilatedCourseId = 2,
                     AffilatedStudentId = 3,

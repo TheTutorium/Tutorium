@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace tutorium.Models
 {
     public class Booking
@@ -19,6 +21,7 @@ namespace tutorium.Models
         public int AffilatedStudentId { get; set; }
     }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum CanceledBy
     {
         Student,
