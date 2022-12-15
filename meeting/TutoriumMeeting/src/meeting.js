@@ -6,6 +6,7 @@ let Peer = window.Peer;
 let messagesEl = document.querySelector('.messages');
 let peerIdEl = document.querySelector('#connect-to-peer');
 let videoEl = document.querySelector('.remote-video');
+let currentCall = null;
 
 let logMessage = (message) => {
   let newMessage = document.createElement('div');
@@ -44,6 +45,7 @@ peer.on('connection', (conn) => {
 
 // Handle incoming voice/video connection
 peer.on('call', (call) => {
+  currentCall = call;
   navigator.mediaDevices.getUserMedia({video: true, audio: true})
     .then((stream) => {
       call.answer(stream); // Answer the call with an A/V stream.
@@ -53,6 +55,7 @@ peer.on('call', (call) => {
       console.error('Failed to get local stream', err);
     });
 });
+
 
 // Initiate outgoing connection
 let connectToPeer = () => {
@@ -70,6 +73,7 @@ let connectToPeer = () => {
   navigator.mediaDevices.getUserMedia({video: true, audio: true})
     .then((stream) => {
       let call = peer.call(peerId, stream);
+      currentCall = call;
       call.on('stream', renderVideo);
     })
     .catch((err) => {
@@ -77,4 +81,12 @@ let connectToPeer = () => {
     });
 };
 
+// Close the connection for both peers
+let disconnectFromPeer = () => {
+  logMessage('Disconnecting from peer');
+  currentCall.close();
+  peer.disconnect();
+};
+
 window.connectToPeer = connectToPeer;
+window.disconnectFromPeer = disconnectFromPeer;
