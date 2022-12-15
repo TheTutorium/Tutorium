@@ -90,3 +90,111 @@ let disconnectFromPeer = () => {
 
 window.connectToPeer = connectToPeer;
 window.disconnectFromPeer = disconnectFromPeer;
+
+
+// Whiteboard Part
+
+
+const app = new PIXI.Application({
+    antialias: true,
+    background: '#1099bb',
+});
+
+
+const stage = new PIXI.Container();
+
+app.stage.addChild(stage);
+
+const container = document.querySelector('.white-board');
+
+container.appendChild(app.view);
+
+/*const whiteboard = new PIXI.Graphics();
+whiteboard.beginFill(0xffffff);
+whiteboard.drawRect(0, 0, 800, 600);
+whiteboard.endFill();
+stage.addChild(whiteboard);*/
+
+var sprite = new PIXI.Graphics();
+
+let initPointer = null;
+
+let isMouseButtonDown = false;
+
+const putDistance = 1;
+var curDistance = 1;
+
+var mousePosRef;
+
+const getMousePos = (event) => {
+    const pos = { x: 0, y: 0 };
+    if (container) {
+      // Get the position and size of the component on the page.
+      const holderOffset = container.getBoundingClientRect();
+      pos.x = event.pageX - holderOffset.x;
+      pos.y = event.pageY - holderOffset.y;
+    }
+    return pos;
+  };
+
+  const onMouseMove = (e) => {
+    if (!isMouseButtonDown) {
+      return;
+    }
+    
+    // clearSpriteRef(annoRef)
+    if (initPointer == null) return;
+  
+    const curMousePosRef = getMousePos(e);
+    curDistance-= (Math.abs(curMousePosRef.x - mousePosRef.x) + Math.abs(curMousePosRef.y - mousePosRef.y));
+
+    console.log(curDistance);
+
+    if(curDistance>0){
+        sprite.clear();
+        sprite.lineStyle(2, 0xff0000, 1);
+        sprite.moveTo(initPointer.x, initPointer.y);
+    
+        mousePosRef = curMousePosRef;
+        sprite.lineTo(mousePosRef.x, mousePosRef.y);
+    }else{
+        curDistance = putDistance;
+        sprite = new PIXI.Graphics();
+        sprite.lineStyle(2, 0xff0000, 1);
+        sprite.moveTo(initPointer.x, initPointer.y);
+        mousePosRef = curMousePosRef;
+        initPointer = curMousePosRef;
+        sprite.lineTo(mousePosRef.x, mousePosRef.y);
+        stage.addChild(sprite); 
+    }
+    
+    
+  };
+
+  const onMouseDown = (e) => {
+    mousePosRef = getMousePos(e);
+    initPointer = mousePosRef;
+  
+    sprite = new PIXI.Graphics();
+    sprite.lineStyle(2, 0xff0000, 1);
+    sprite.moveTo(initPointer.x, initPointer.y);
+    sprite.lineTo(mousePosRef.x, mousePosRef.y);
+  
+    stage.addChild(sprite);
+    
+    isMouseButtonDown = true;
+
+    console.log(mousePosRef);
+  };
+  const onMouseUp = (e) => {
+    isMouseButtonDown = false;
+  };
+  
+  container
+    .addEventListener("mousemove", onMouseMove, 0);
+  
+  container
+    .addEventListener("mousedown", onMouseDown, 0);
+  
+  container
+    .addEventListener("mouseup", onMouseUp, 0);
