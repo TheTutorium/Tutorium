@@ -39,8 +39,5 @@ app.use('/peerjs', peerServer);
 
 
 
-// Whiteboard Part
-
-
 
 
