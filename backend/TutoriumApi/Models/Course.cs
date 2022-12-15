@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace tutorium.Models
 {
     public class Course
@@ -26,14 +28,7 @@ namespace tutorium.Models
         public int AffilatedTutorId { get; set; }
     }
 
-    public enum VerifiedStatusType
-    {
-        NotVerifable,
-        NotVerified,
-        InProcess,
-        Verified
-    }
-
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum SubjectType
     {
         English,
@@ -41,8 +36,18 @@ namespace tutorium.Models
         Other,
     }
 
-    static class VerifableCourseTypes
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum VerifableCourseName
     {
-        public const string YKS = "YKS";
+        YKS
+    }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum VerifiedStatusType
+    {
+        NotVerifable,
+        NotVerified,
+        InProcess,
+        Verified
     }
 }

@@ -1,6 +1,6 @@
 using tutorium.Models;
 
-namespace tutorium.Dtos.Course
+namespace tutorium.Dtos.BookingDto
 {
     public class UpdateBookingDto
     {

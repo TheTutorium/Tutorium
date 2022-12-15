@@ -1,6 +1,8 @@
 using tutorium.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using tutorium.Services.CourseServices;
+using tutorium.Filters;
 
 namespace tutorium
 {
@@ -17,8 +19,8 @@ namespace tutorium
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<TutoriumContext>(x => x.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddControllers();
+            services.AddDbContext<TutoriumContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddControllers(options => options.Filters.Add(typeof(ExceptionHandlingFilter)));
             services.AddEndpointsApiExplorer();  // TODO: I do not know what this do.
             services.AddSwaggerGen(c =>
             {
@@ -50,6 +52,8 @@ namespace tutorium
             });
 
             services.AddAutoMapper(typeof(Startup));
+            services.AddScoped<ICourseService, CourseService>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCors(
                 builder => builder.AddDefaultPolicy(
                      a => a.AllowAnyMethod()
@@ -64,7 +68,7 @@ namespace tutorium
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("./v0/swagger.json", "Tutorium API V0"));
             }
 
             // app.UseHttpsRedirection();
