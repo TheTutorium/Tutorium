@@ -79,14 +79,20 @@ peer.on('connection', (conn) => {
         logMessage(`received: ${data}`);
         connectionInitiated = true;
     }else{
-        let splittedMessage = `${data}`.split('|');
+        let splittedMessage = data.split('|');
         let initX = parseFloat(splittedMessage[0]);
         let initY = parseFloat(splittedMessage[1]);
         let finalX = parseFloat(splittedMessage[2]);
         let finalY = parseFloat(splittedMessage[3]);
+        currentZIndex = parseFloat(splittedMessage[5]);
 
         sprite = new PIXI.Graphics();
-        sprite.lineStyle(2, 0xff0000, 1);
+        if(parseFloat(splittedMessage[4]) == 0){
+          sprite.lineStyle(2, 0xff0000, 1);
+        }else if(parseFloat(splittedMessage[4]) == 1){
+          sprite.lineStyle(10, 0x1099bb, 1);
+        }
+        sprite.zIndex = currentZIndex;
         sprite.moveTo(initX, initY);
         sprite.lineTo(finalX, finalY);
       
@@ -125,18 +131,24 @@ let connectToPeer = () => {
         logMessage(`received: ${data}`);
         connectionInitiated = true;
     }else{
-        let splittedMessage = `${data}`.split('|');
-        let initX = parseFloat(splittedMessage[0]);
-        let initY = parseFloat(splittedMessage[1]);
-        let finalX = parseFloat(splittedMessage[2]);
-        let finalY = parseFloat(splittedMessage[3]);
+      let splittedMessage = data.split('|');
+      let initX = parseFloat(splittedMessage[0]);
+      let initY = parseFloat(splittedMessage[1]);
+      let finalX = parseFloat(splittedMessage[2]);
+      let finalY = parseFloat(splittedMessage[3]);
+      currentZIndex = parseFloat(splittedMessage[5]);
 
-        sprite = new PIXI.Graphics();
+      sprite = new PIXI.Graphics();
+      if(parseFloat(splittedMessage[4]) == 0){
         sprite.lineStyle(2, 0xff0000, 1);
-        sprite.moveTo(initX, initY);
-        sprite.lineTo(finalX, finalY);
-      
-        stage.addChild(sprite);
+      }else if(parseFloat(splittedMessage[4]) == 1){
+        sprite.lineStyle(10, 0x1099bb, 1);
+      }
+      sprite.zIndex = currentZIndex;
+      sprite.moveTo(initX, initY);
+      sprite.lineTo(finalX, finalY);
+    
+      stage.addChild(sprite);
     }
   });
   conn.on('open', () => {
@@ -167,14 +179,24 @@ window.disconnectFromPeer = disconnectFromPeer;
 
 // Whiteboard Part
 
+let currentZIndex = 0;
+let currentPenType = 0;
 
+const changePenType = (type) => {
+    currentPenType = type;
+    currentZIndex++;
+    console.log(currentPenType);
+    console.log(currentZIndex);
+}
+
+window.changePenType = changePenType;
 
 
 const getMousePos = (event) => {
     const pos = { x: 0, y: 0 };
     if (container) {
       // Get the position and size of the component on the page.
-      const holderOffset = container.getBoundingClientRect();
+      const holderOffset = app.view.getBoundingClientRect();
       pos.x = event.pageX - holderOffset.x;
       pos.y = event.pageY - holderOffset.y;
     }
@@ -192,11 +214,14 @@ const getMousePos = (event) => {
     const curMousePosRef = getMousePos(e);
     curDistance-= (Math.abs(curMousePosRef.x - mousePosRef.x) + Math.abs(curMousePosRef.y - mousePosRef.y));
 
-    console.log(curDistance);
-
     if(curDistance>0){
         sprite.clear();
-        sprite.lineStyle(2, 0xff0000, 1);
+        if(currentPenType === 0){
+          sprite.lineStyle(2, 0xff0000, 1);
+        }else if(currentPenType === 1){
+          sprite.lineStyle(10, 0x1099bb, 1);
+        }
+        sprite.zIndex = currentZIndex;
         sprite.moveTo(initPointer.x, initPointer.y);
     
         mousePosRef = curMousePosRef;
@@ -204,10 +229,15 @@ const getMousePos = (event) => {
     }else{
         curDistance = putDistance;
         sprite = new PIXI.Graphics();
-        sprite.lineStyle(2, 0xff0000, 1);
+        if(currentPenType === 0){
+          sprite.lineStyle(2, 0xff0000, 1);
+        }else if(currentPenType === 1){
+          sprite.lineStyle(10, 0x1099bb, 1);
+        }
         sprite.moveTo(initPointer.x, initPointer.y);
+        sprite.zIndex = currentZIndex;
         mousePosRef = curMousePosRef;
-        otherPeer.send(initPointer.x + '|' + initPointer.y + '|' + mousePosRef.x + '|' + mousePosRef.y);
+        otherPeer.send(initPointer.x + '|' + initPointer.y + '|' + mousePosRef.x + '|' + mousePosRef.y + '|' +currentPenType + '|' + currentZIndex);
         initPointer = curMousePosRef;
         sprite.lineTo(mousePosRef.x, mousePosRef.y);
         stage.addChild(sprite); 
@@ -221,7 +251,11 @@ const getMousePos = (event) => {
     initPointer = mousePosRef;
   
     sprite = new PIXI.Graphics();
-    sprite.lineStyle(2, 0xff0000, 1);
+    if(currentPenType === 0){
+      sprite.lineStyle(2, 0xff0000, 1);
+    }else if(currentPenType === 1){
+      sprite.lineStyle(10, 0x1099bb, 1);
+    }
     sprite.moveTo(initPointer.x, initPointer.y);
     sprite.lineTo(mousePosRef.x, mousePosRef.y);
   
@@ -232,7 +266,7 @@ const getMousePos = (event) => {
     console.log(mousePosRef);
   };
   const onMouseUp = (e) => {
-    otherPeer.send(initPointer.x + '|' + initPointer.y + '|' + getMousePos(e).x + '|' + getMousePos(e).y);
+    otherPeer.send(initPointer.x + '|' + initPointer.y + '|' + getMousePos(e).x + '|' + getMousePos(e).y + '|' + currentPenType + '|' + currentZIndex);
     isMouseButtonDown = false;
   };
   
