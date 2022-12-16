@@ -1,3 +1,18 @@
 .nav-menu {
-    background-color: #61dafb;
+    background-color: white !important;
+}
+
+.navigator-right-menu {
+    margin-right: 18% !important;
+}
+
+.navigator-left-menu {
+    margin-left: 18% !important;
+}
+
+.nav-menu > .item.active,
+.navigator-right-menu > .item.active,
+.navigator-left-menu > .item.active {
+    border-color: transparent !important;
+    color: rgb(241 159 7) !important;
 }
