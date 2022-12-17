@@ -1,9 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using tutorium.Dtos.CourseDto;
-using tutorium.Models;
 
-namespace tutorium.Services.CourseServices
+namespace tutorium.Services.CourseService
 {
     public interface ICourseService
     {
@@ -11,6 +8,6 @@ namespace tutorium.Services.CourseServices
         Task<GetCourseDto> CreateCourse(CreateCourseDto createCourseDto);
         Task DeleteCourse(int courseId);
         Task<GetCourseDto> GetCourse(int courseId);
-        Task<GetCourseDto> UpdateCourse(UpdateCourseDto editCourseDto);
+        Task<GetCourseDto> UpdateCourse(int courseId, UpdateCourseDto updateCourseDto);
     }
 }

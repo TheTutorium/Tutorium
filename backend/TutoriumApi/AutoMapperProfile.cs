@@ -14,6 +14,7 @@ namespace tutorium
         {
             CreateMap<Booking, BookingEndDto>()
                 .ForMember(b => b.Duration, opt => opt.Ignore());
+
             CreateMap<Booking, GetBookingEndDto>()
                 .ForMember(b => b.Duration, opt => opt.Ignore());
 
@@ -22,6 +23,7 @@ namespace tutorium
             CreateMap<Material, MaterialEndDto>();
 
             CreateMap<Review, ReviewEndDto>();
+            CreateMap<Review, GetReviewDto>();
 
             CreateMap<WhiteboardSave, WhiteboardSaveEndDto>();
         }

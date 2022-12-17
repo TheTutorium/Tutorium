@@ -1,7 +1,8 @@
 using tutorium.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using tutorium.Services.CourseServices;
+using tutorium.Services.CourseService;
+using tutorium.Services.ReviewService;
 using tutorium.Filters;
 
 namespace tutorium
@@ -53,6 +54,7 @@ namespace tutorium
 
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<ICourseService, CourseService>();
+            services.AddScoped<IReviewService, ReviewService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCors(
                 builder => builder.AddDefaultPolicy(
