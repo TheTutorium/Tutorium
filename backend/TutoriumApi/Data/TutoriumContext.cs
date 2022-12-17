@@ -211,7 +211,8 @@ namespace tutorium.Data
                 {
                     Id = 1,
                     Comment = "Kotu",
-                    Date = new DateTime(2023, 3, 30, 7, 0, 0),
+                    CreatedAt = new DateTime(2023, 3, 30, 7, 0, 0),
+                    UpdatedAt = new DateTime(2024, 3, 30, 7, 0, 0),
                     Rating = 9.8m,
                     AffilatedCourseId = 1,
                     AffilatedStudentId = 1,
@@ -220,7 +221,7 @@ namespace tutorium.Data
                 {
                     Id = 2,
                     Comment = "Iyi",
-                    Date = new DateTime(2023, 4, 30, 7, 0, 0),
+                    CreatedAt = new DateTime(2023, 4, 30, 7, 0, 0),
                     Rating = 6.8m,
                     AffilatedCourseId = 2,
                     AffilatedStudentId = 1,
@@ -229,7 +230,7 @@ namespace tutorium.Data
                 {
                     Id = 3,
                     Comment = "Vasat",
-                    Date = new DateTime(2023, 5, 30, 7, 0, 0),
+                    CreatedAt = new DateTime(2023, 5, 30, 7, 0, 0),
                     Rating = 4.8m,
                     AffilatedCourseId = 2,
                     AffilatedStudentId = 3,

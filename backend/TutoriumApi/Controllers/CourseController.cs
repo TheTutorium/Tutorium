@@ -1,5 +1,5 @@
 using tutorium.Dtos.CourseDto;
-using tutorium.Services.CourseServices;
+using tutorium.Services.CourseService;
 using Microsoft.AspNetCore.Mvc;
 using tutorium.Utils;
 
@@ -37,7 +37,6 @@ namespace tutorium.Controllers
 
 
         [HttpGet("{id}")]
-        [ActionName("RetrieveValue")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(MessageObject), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GetCourseDto>> GetCourse(int id)
@@ -45,14 +44,14 @@ namespace tutorium.Controllers
             return Ok(await _courseService.GetCourse(id));
         }
 
-        [HttpPatch]
+        [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(MessageObject), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<GetCourseDto>> UpdateCourse(UpdateCourseDto updateCourseDto)
+        public async Task<ActionResult<GetCourseDto>> UpdateCourse(int id, UpdateCourseDto updateCourseDto)
         {
-            return Ok(await _courseService.UpdateCourse(updateCourseDto));
+            return Ok(await _courseService.UpdateCourse(id, updateCourseDto));
         }
     }
 }

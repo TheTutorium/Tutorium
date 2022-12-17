@@ -9,9 +9,10 @@ namespace tutorium.Models
 
         // Attributes
         public string Comment { get; set; } = null!;
-        public DateTime Date { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
-        [Column(TypeName = "decimal(2, 1)")]
+        [Column(TypeName = "decimal(3, 1)")]
         public decimal Rating { get; set; }
 
         // Foreign Keys
