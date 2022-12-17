@@ -41,7 +41,7 @@ jobs:
       - run: cd meeting/TutoriumMeeting && yarn checks
 
 workflows:
-  lint-and-deploy:
+  lint-and-build:
     jobs:
       - lint-check-backend
       - lint-check-frontend

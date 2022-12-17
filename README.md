@@ -15,7 +15,6 @@ Coming Soon
 Coming Soon
 
 # Contributors
-Aybala Karakaya ([aaybala](http://github.com/aaybala)) <br />
 Barış Ogün Yörük ([barisoyoruk](http://github.com/barisoyoruk)) <br />
 Halil Özgür Demir ([hozgurde](http://github.com/hozgurde)) <br />
 Mustafa Çağrı Durgut ([mcagridurgut](http://github.com/mcagridurgut)) <br />
