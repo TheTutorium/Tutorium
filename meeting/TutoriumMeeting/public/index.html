@@ -9,6 +9,7 @@
       content="Meeting Component for Tutorium."
     />
     <link rel="manifest" href="/public/manifest.json" />
+    <link rel="stylesheet" href="/public/style.css">
     <title>Tutorium Meeting</title>
 
     <script src="https://pixijs.download/release/pixi.js"></script>
@@ -16,31 +17,48 @@
     <script src="/meeting.js" type="module"></script>
   </head>
   <body>
+    <nav id="toolbar">
+      <ul>
+        <li>
+        <input type="text" id="connect-to-peer" placeholder="Enter Peer ID" ></input>
+      </li>
+      <li>
+        <button onclick="connectToPeer()">
+          Connect
+        </button></li>
+      <li>
+        <button onclick="disconnectFromPeer()">
+          Disconnect
+        </button></li>
+        <li>
+          <div class="messages">
+      
+          </div>
+        </li>
+      </ul>
+    </nav>
     <div class="white-board">
 
     </div>
-    <div>
-    <button onclick="changePenType(0)">
+    <div id="tools">
+    <button onclick="changePenType(0)" class="tool">
       Pen
     </button>
-    <button onclick="changePenType(1)">
+    <button onclick="changePenType(1)" class="tool">
       Eraser
+    </button>
+    <button id="share-screen-button" class="tool">
+      Share Screen
     </button>
   </div>
 
-
+  <div id="video-container">
     <video class="remote-video" autoplay></video>
-    <input type="text" id="connect-to-peer" />
-    <button onclick="connectToPeer()">
-      Connect
-    </button>
-    <button onclick="disconnectFromPeer()">
-      Disconnect
-    </button>
+    <video id="local-video" autoplay></video>
+  </div>
     
-    <div class="messages">
-      
-    </div>
+    
+    
 
   </body>
   

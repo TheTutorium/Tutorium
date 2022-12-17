@@ -3,6 +3,11 @@
 const app = new PIXI.Application({
     antialias: true,
     background: '#1099bb',
+    width: 400, height: 300
+});
+
+window.addEventListener("resize", () => {
+  app.resize(window.width * 2, window.height * 2);
 });
 
 
@@ -73,10 +78,8 @@ peer.on('error', (error) => {
 // Handle incoming data connection
 peer.on('connection', (conn) => {
     otherPeer = conn;
-  logMessage('incoming peer connection!');
   conn.on('data', (data) => {
     if(!connectionInitiated){
-        logMessage(`received: ${data}`);
         connectionInitiated = true;
     }else{
         let splittedMessage = data.split('|');
@@ -122,13 +125,11 @@ peer.on('call', (call) => {
 // Initiate outgoing connection
 let connectToPeer = () => {
   let peerId = peerIdEl.value;
-  logMessage(`Connecting to ${peerId}...`);
   
   let conn = peer.connect(peerId);
   otherPeer = conn;
   conn.on('data', (data) => {
     if(!connectionInitiated){
-        logMessage(`received: ${data}`);
         connectionInitiated = true;
     }else{
       let splittedMessage = data.split('|');
@@ -151,6 +152,16 @@ let connectToPeer = () => {
       stage.addChild(sprite);
     }
   });
+
+  navigator.mediaDevices.getUserMedia({
+    video: {
+      mediaSource: 'screen',
+    },
+  }).then(stream => {
+    // Use the stream in your PeerJS connection
+    conn.addStream(stream);
+  });
+
   conn.on('open', () => {
     conn.send('hi!');
   });
@@ -166,6 +177,7 @@ let connectToPeer = () => {
     });
 };
 
+
 // Close the connection for both peers
 let disconnectFromPeer = () => {
   logMessage('Disconnecting from peer');
@@ -175,6 +187,17 @@ let disconnectFromPeer = () => {
 
 window.connectToPeer = connectToPeer;
 window.disconnectFromPeer = disconnectFromPeer;
+
+navigator.getUserMedia = navigator.getUserMedia ||
+                         navigator.webkitGetUserMedia ||
+                         navigator.mozGetUserMedia;
+
+navigator.getUserMedia({ video: true, audio: false }, function(stream) {
+  // Set the source of the video element to the stream
+  document.getElementById('local-video').srcObject = stream;
+}, function(err) {
+  console.error(err);
+});
 
 
 // Whiteboard Part
