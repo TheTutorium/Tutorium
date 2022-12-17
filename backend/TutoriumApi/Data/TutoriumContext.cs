@@ -134,18 +134,24 @@ namespace tutorium.Data
                 new Material
                 {
                     Id = 1,
+                    Description = "dasdas",
+                    DisplayName = "adsdas",
                     FilePath = "/File/Path/Fake",
                     AffilatedCourseId = 1
                 },
                 new Material
                 {
                     Id = 2,
+                    Description = "dasdas",
+                    DisplayName = "adsdas",
                     FilePath = "/File/Path/Fake",
                     AffilatedCourseId = 1
                 },
                 new Material
                 {
                     Id = 3,
+                    Description = "dasdas",
+                    DisplayName = "adsdas",
                     FilePath = "/File/Path/Fake",
                     AffilatedCourseId = 2
                 }
