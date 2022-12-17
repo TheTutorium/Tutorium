@@ -19,8 +19,8 @@ namespace tutorium.Dtos.CourseDto
         public VerifiedStatusType VerifiedStatus { get; set; }
 
         public ICollection<BookingEndDto> Bookings { get; set; } = null!;
-        public ICollection<MaterialEndDto> Materials { get; set; } = null!;
-        public ICollection<ReviewEndDto> Reviews { get; set; } = null!;
+        public ICollection<GetMaterialDto> Materials { get; set; } = null!;
+        public ICollection<GetReviewDto> Reviews { get; set; } = null!;
 
         public int AffilatedTutorId { get; set; }
     }

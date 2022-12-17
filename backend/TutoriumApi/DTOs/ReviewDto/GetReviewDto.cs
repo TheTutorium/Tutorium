@@ -6,7 +6,7 @@ namespace tutorium.Dtos.ReviewDto
 
         public string Comment { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public decimal Rating { get; set; }
 
         public int AffilatedCourseId { get; set; }

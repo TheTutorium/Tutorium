@@ -20,9 +20,8 @@ namespace tutorium
 
             CreateMap<Course, GetCourseDto>();
 
-            CreateMap<Material, MaterialEndDto>();
+            CreateMap<Material, GetMaterialDto>();
 
-            CreateMap<Review, ReviewEndDto>();
             CreateMap<Review, GetReviewDto>();
 
             CreateMap<WhiteboardSave, WhiteboardSaveEndDto>();
