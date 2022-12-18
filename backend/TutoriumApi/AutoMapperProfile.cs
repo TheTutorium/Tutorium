@@ -5,6 +5,7 @@ using tutorium.Dtos.CourseDto;
 using tutorium.Dtos.MaterialDto;
 using tutorium.Dtos.ReviewDto;
 using tutorium.Dtos.WhiteboardSaveDto;
+using tutorium.Dtos.User;
 
 namespace tutorium
 {
@@ -25,6 +26,9 @@ namespace tutorium
             CreateMap<Review, GetReviewDto>();
 
             CreateMap<WhiteboardSave, WhiteboardSaveEndDto>();
+            
+            CreateMap<User, GetUserDto>();
+        
         }
 
     }

@@ -24,7 +24,7 @@ namespace tutorium.Models
         public ICollection<Review> Reviews { get; set; } = null!;
 
         // Foreign Keys
-        public Tutor AffilatedTutor { get; set; } = null!;
+        public User AffilatedTutor { get; set; } = null!;
         public int AffilatedTutorId { get; set; }
     }
 

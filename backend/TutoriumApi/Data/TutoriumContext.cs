@@ -13,18 +13,54 @@ namespace tutorium.Data
         public DbSet<Course> Courses { get; set; } = null!;
         public DbSet<Material> Materials { get; set; } = null!;
         public DbSet<Review> Reviews { get; set; } = null!;
-        public DbSet<Student> Students { get; set; } = null!;
-        public DbSet<Tutor> Tutors { get; set; } = null!;
-        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<User> SUsers { get; set; } = null!;
         public DbSet<WhiteboardSave> WhiteboardSaves { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             byte[] hash, salt;
-            Password.CreateHash("tutor", out hash, out salt);
+            Utils.Utility.CreateHash("tutor", out hash, out salt);
 
-            modelBuilder.Entity<Student>().HasData(
-                new Student
+            // Susers on affileated student, avoid cycles
+            modelBuilder.Entity<Booking>()
+                .HasOne(booking => booking.AffilatedStudent)
+                .WithMany(student => student.Bookings)
+                .HasForeignKey(booking => booking.AffilatedStudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Susers on affileated student, avoid cycles
+            modelBuilder.Entity<Review>()
+                .HasOne(review => review.AffilatedStudent)
+                .WithMany(student => student.Reviews)
+                .HasForeignKey(review => review.AffilatedStudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            // reviews on affileated course, avoid cycles
+            modelBuilder.Entity<Review>()
+                .HasOne(review => review.AffilatedCourse)
+                .WithMany(course => course.Reviews)
+                .HasForeignKey(review => review.AffilatedCourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            // materials on affileated course, avoid cycles
+            modelBuilder.Entity<Material>()
+                .HasOne(material => material.AffilatedCourse)
+                .WithMany(course => course.Materials)
+                .HasForeignKey(material => material.AffilatedCourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            // bookings on affileated course, avoid cycles
+            modelBuilder.Entity<Booking>()
+                .HasOne(booking => booking.AffilatedCourse)
+                .WithMany(course => course.Bookings)
+                .HasForeignKey(booking => booking.AffilatedCourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+
+
+            // add some users
+            modelBuilder.Entity<User>().HasData(
+                new User
                 {
                     Id = 1,
                     Email = "baris@student",
@@ -32,11 +68,12 @@ namespace tutorium.Data
                     FirstName = "Baris Ogun",
                     LastName = "Yoruk",
                     PasswordHash = hash,
+                    SecondPasswordHash = hash,
                     PasswordSalt = salt,
                     Phone = "00905075711001",
                     PhoneVerifiedStatus = true,
                 },
-                new Student
+                new User
                 {
                     Id = 2,
                     Email = "cagri@student",
@@ -44,11 +81,12 @@ namespace tutorium.Data
                     FirstName = "Mustafa Cagri",
                     LastName = "Durgut",
                     PasswordHash = hash,
+                    SecondPasswordHash = hash,
                     PasswordSalt = salt,
                     Phone = "0000000000000",
                     PhoneVerifiedStatus = true,
                 },
-                new Student
+                new User
                 {
                     Id = 3,
                     Email = "oguzhan@student",
@@ -57,35 +95,37 @@ namespace tutorium.Data
                     FirstName = "Oguzhan",
                     LastName = "Ozcelik",
                     PasswordHash = hash,
+                    SecondPasswordHash = hash,
                     PasswordSalt = salt,
                     Phone = "0000000000000",
                     PhoneVerifiedStatus = true,
-                }
-            );
-
-            modelBuilder.Entity<Tutor>().HasData(
-                new Tutor
+                },
+                new User
                 {
                     Id = 4,
+                    UserType = UserType.Tutor,
                     Description = "Selamlar",
                     Email = "ozgur@tutor",
                     EmailVerifiedStatus = true,
                     FirstName = "Halil Ozgur",
                     LastName = "Demir",
                     PasswordHash = hash,
+                    SecondPasswordHash = hash,
                     PasswordSalt = salt,
                     Phone = "0000000000000",
                     PhoneVerifiedStatus = true,
                 },
-                new Tutor
+                new User
                 {
                     Id = 5,
+                    UserType = UserType.Tutor,
                     Description = "Merhaba arkadaslar",
                     Email = "yusuf@tutor",
                     EmailVerifiedStatus = true,
                     FirstName = "Yusuf Mirac",
                     LastName = "Uyar",
                     PasswordHash = hash,
+                    SecondPasswordHash = hash,
                     PasswordSalt = salt,
                     Phone = "0000000000000",
                     PhoneVerificationCode = "1234",
@@ -243,5 +283,6 @@ namespace tutorium.Data
                 }
             );
         }
+
     }
 }
