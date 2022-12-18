@@ -6,6 +6,7 @@ interface User {
     lastName: string;
     phone: string;
     phoneVerifiedStatus: boolean;
+    profilePictureURL: string;
 }
 
 export default User;
