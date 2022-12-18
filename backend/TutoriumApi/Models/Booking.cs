@@ -17,7 +17,7 @@ namespace tutorium.Models
         // Foreing Keys
         public Course AffilatedCourse { get; set; } = null!;
         public int AffilatedCourseId { get; set; }
-        public Student AffilatedStudent { get; set; } = null!;
+        public User AffilatedStudent { get; set; } = null!;
         public int AffilatedStudentId { get; set; }
     }
 
