@@ -5,6 +5,10 @@ using tutorium.Services.CourseService;
 using tutorium.Services.ReviewService;
 using tutorium.Services.MaterialService;
 using tutorium.Filters;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using tutorium.Services.AuthService;
 
 namespace tutorium
 {
@@ -21,6 +25,7 @@ namespace tutorium
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // IServiceCollection serviceCollection = services.AddDbContext<TutoriumContext>(x => x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddDbContext<TutoriumContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
             services.AddControllers(options => options.Filters.Add(typeof(ExceptionHandlingFilter)));
             services.AddEndpointsApiExplorer();  // TODO: I do not know what this do.
@@ -54,11 +59,27 @@ namespace tutorium
             });
 
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII
+                        .GetBytes(Configuration.GetSection("AppSettings:Token").Value)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
+
             services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IMaterialFileService, MaterialFileService>();
             services.AddScoped<IMaterialService, MaterialService>();
+            services.AddScoped<IAuthService, AuthService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddHttpContextAccessor();
             services.AddCors(
                 builder => builder.AddDefaultPolicy(
                      a => a.AllowAnyMethod()
@@ -87,6 +108,7 @@ namespace tutorium
                 .AllowCredentials()
             );
 
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {

@@ -25,7 +25,7 @@ namespace tutorium.Services.CourseService
 
         public async Task<GetCourseDto> CreateCourse(CreateCourseDto createCourseDto)
         {
-            Tutor? tutor = await _context.Tutors
+            User? tutor = await _context.SUsers
                 .Include(t => t.Courses)
                 .FirstOrDefaultAsync(t => t.Id == GetUserId());
 
