@@ -11,7 +11,7 @@ namespace tutorium.Dtos.BookingDto
         public DateTime Date { get; set; }
         public int Duration { get; set; }
 
-        public ICollection<WhiteboardSaveEndDto> WhiteboardSaves { get; set; } = null!;
+        public ICollection<GetWhiteboardSaveDto> WhiteboardSaves { get; set; } = null!;
 
 
         public int AffilatedCourseId { get; set; }

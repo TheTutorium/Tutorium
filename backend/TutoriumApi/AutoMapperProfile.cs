@@ -27,7 +27,7 @@ namespace tutorium
 
             CreateMap<User, GetUserDto>();
 
-            CreateMap<WhiteboardSave, WhiteboardSaveEndDto>();
+            CreateMap<WhiteboardSave, GetWhiteboardSaveDto>();
         }
     }
 }

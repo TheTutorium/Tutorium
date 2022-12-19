@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using tutorium.Models;
 using tutorium.Exceptions;
 using tutorium.Utils;
+using tutorium.Services.FileService;
 using tutorium.Data;
 using tutorium.Dtos.MaterialDto;
 
@@ -11,14 +12,14 @@ namespace tutorium.Services.MaterialService
     public class MaterialService : IMaterialService
     {
         private readonly TutoriumContext _context;
-        private readonly IMaterialFileService _materialFileService;
+        private readonly IFileService _fileService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMapper _mapper;
 
-        public MaterialService(TutoriumContext context, IMaterialFileService materialFileService, IHttpContextAccessor httpContextAccessor, IMapper mapper)
+        public MaterialService(TutoriumContext context, IFileService fileService, IHttpContextAccessor httpContextAccessor, IMapper mapper)
         {
             _context = context;
-            _materialFileService = materialFileService;
+            _fileService = fileService;
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
         }
@@ -61,7 +62,7 @@ namespace tutorium.Services.MaterialService
             }
 
 
-            string filePath = await _materialFileService.SaveFileAsync(course.Id, createMaterialDto.File);
+            string filePath = await _fileService.SaveFileAsync(course.Id, createMaterialDto.File, FileType.Material);
 
             Material newMaterial = new Material
             {
@@ -95,7 +96,7 @@ namespace tutorium.Services.MaterialService
                 throw new UnauthorizedException("The tutor does not have right to delete this material");
             }
 
-            _materialFileService.DeleteFile(material.FilePath);
+            _fileService.DeleteFile(material.FilePath);
 
             _context.Materials.Remove(material);
             await _context.SaveChangesAsync();

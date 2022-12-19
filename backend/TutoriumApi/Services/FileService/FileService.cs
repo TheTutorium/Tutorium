@@ -1,24 +1,27 @@
-namespace tutorium.Services.MaterialService
+namespace tutorium.Services.FileService
 {
-    public class MaterialFileService : IMaterialFileService
+    public class FileService : IFileService
     {
-        private const string COMMON_MATERIAL_DIR = "StaticFiles/Materials";
-        private IWebHostEnvironment _hostingEnvironment;
+        private const string COMMON_DIR = "StaticFiles";
+        private const string COURSE_DIR = $"{COMMON_DIR}/Courses";
+        private const string BOOKING_DIR = $"{COMMON_DIR}/Bookings";
 
-        public MaterialFileService(IWebHostEnvironment hostingEnvironment)
+        private IWebHostEnvironment _hostingEnvironment;
+        public FileService(IWebHostEnvironment hostingEnvironment)
         {
             _hostingEnvironment = hostingEnvironment;
         }
 
-        public async Task<string> SaveFileAsync(int courseId, IFormFile file)
+        public async Task<string> SaveFileAsync(int dirId, IFormFile file, FileType fileType)
         {
-            var filePath = Path.Combine(GetCourseDirectory(courseId), file.FileName);
+            var filePath = Path.Combine(GetDirectory(dirId, fileType), file.FileName);
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
             return filePath;
         }
+
 
         public void DeleteFile(string filePath)
         {
@@ -32,15 +35,22 @@ namespace tutorium.Services.MaterialService
             }
         }
 
-        private string GetCourseDirectory(int courseId)
+        private string GetDirectory(int dirId, FileType fileType)
         {
+            string common_dir = fileType == FileType.Material ? COURSE_DIR : BOOKING_DIR;
             string courseDir = Path.Combine(_hostingEnvironment.ContentRootPath, string.Format("{0}/{1}",
-                COMMON_MATERIAL_DIR, courseId));
+                common_dir, dirId));
             if (!Directory.Exists(courseDir))
             {
                 Directory.CreateDirectory(courseDir);
             }
             return courseDir;
         }
+    }
+
+    public enum FileType
+    {
+        Material,
+        WhiteboardSave
     }
 }

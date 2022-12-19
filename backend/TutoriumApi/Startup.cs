@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using tutorium.Services.CourseService;
 using tutorium.Services.ReviewService;
+using tutorium.Services.FileService;
 using tutorium.Services.MaterialService;
+using tutorium.Services.WhiteboardSaveService;
 using tutorium.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -73,9 +75,10 @@ namespace tutorium
 
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICourseService, CourseService>();
+            services.AddScoped<IFileService, FileService>();
             services.AddScoped<IReviewService, ReviewService>();
-            services.AddScoped<IMaterialFileService, MaterialFileService>();
             services.AddScoped<IMaterialService, MaterialService>();
+            services.AddScoped<IWhitebaordSaveService, WhiteboardSaveService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddHttpContextAccessor();
             services.AddCors(
