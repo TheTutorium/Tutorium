@@ -506,3 +506,5 @@ $RECYCLE.BIN/
 publish/
 
 backend/TutoriumApi/Migrations/
+
+backend/TutoriumApi/StaticFiles/

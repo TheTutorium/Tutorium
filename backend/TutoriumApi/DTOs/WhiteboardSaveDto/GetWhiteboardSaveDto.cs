@@ -1,6 +1,6 @@
 namespace tutorium.Dtos.WhiteboardSaveDto
 {
-    public class WhiteboardSaveEndDto
+    public class GetWhiteboardSaveDto
     {
         public int Id { get; set; }
 
