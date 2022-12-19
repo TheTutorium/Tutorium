@@ -6,5 +6,6 @@ namespace tutorium.Services.WhiteboardSaveService
     {
         Task<GetWhiteboardSaveDto> CreateWhiteboardSave(CreateWhiteboardSaveDto createWhiteboardSaveDto);
         Task DeleteWhiteboardSave(int whiteboardSaveId);
+        Task<byte[]> CreateBookingPdf(int bookingId);
     }
 }

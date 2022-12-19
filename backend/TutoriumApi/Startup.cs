@@ -6,6 +6,7 @@ using tutorium.Services.ReviewService;
 using tutorium.Services.FileService;
 using tutorium.Services.MaterialService;
 using tutorium.Services.WhiteboardSaveService;
+using tutorium.Services.PdfService;
 using tutorium.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -76,6 +77,7 @@ namespace tutorium
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<IFileService, FileService>();
+            services.AddScoped<IPdfService, PdfService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IMaterialService, MaterialService>();
             services.AddScoped<IWhitebaordSaveService, WhiteboardSaveService>();

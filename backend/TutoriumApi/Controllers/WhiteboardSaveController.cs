@@ -17,6 +17,16 @@ namespace tutorium.Controllers
             _whiteboardSaveService = whitebaordSaveService;
         }
 
+        [HttpPost("pdf")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(MessageObject), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(MessageObject), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IFileHttpResult>> CreateBookingPdf(int bookingId)
+        {
+            return File(await _whiteboardSaveService.CreateBookingPdf(bookingId), "application/zip", "whiteboard");
+        }
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(MessageObject), StatusCodes.Status401Unauthorized)]
