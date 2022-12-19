@@ -21,13 +21,11 @@ namespace tutorium.Services.CourseService
             _mapper = mapper;
         }
 
-        private int? GetUserId() => 4;
-
         public async Task<GetCourseDto> CreateCourse(CreateCourseDto createCourseDto)
         {
-            User? tutor = await _context.SUsers
+            User? tutor = await _context.Users
                 .Include(t => t.Courses)
-                .FirstOrDefaultAsync(t => t.Id == GetUserId());
+                .FirstOrDefaultAsync(t => t.Id == Auth.GetUserId(_httpContextAccessor));
 
             if (tutor == null)
             {
@@ -68,7 +66,7 @@ namespace tutorium.Services.CourseService
             {
                 throw new NotFoundException("No such course");
             }
-            if (course.AffilatedTutorId != GetUserId())
+            if (course.AffilatedTutorId != Auth.GetUserId(_httpContextAccessor))
             {
                 throw new UnauthorizedException("Tutor does not own the course");
             }
@@ -100,7 +98,7 @@ namespace tutorium.Services.CourseService
 
             if (course == null)
                 throw new NotFoundException("No such course.");
-            if (course.AffilatedTutorId != GetUserId())
+            if (course.AffilatedTutorId != Auth.GetUserId(_httpContextAccessor))
                 throw new UnauthorizedException("Tutor does not own the course.");
             if (updateCourseDto.Duration % 15 != 0 && updateCourseDto.Duration > 0)
                 throw new BadRequestException("Course duration should be divisible by 15 (in minutes)");

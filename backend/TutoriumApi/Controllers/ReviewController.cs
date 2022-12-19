@@ -2,9 +2,11 @@ using tutorium.Dtos.ReviewDto;
 using tutorium.Services.ReviewService;
 using Microsoft.AspNetCore.Mvc;
 using tutorium.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace tutorium.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class ReviewController : ControllerBase

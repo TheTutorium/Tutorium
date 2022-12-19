@@ -2,9 +2,11 @@ using tutorium.Dtos.CourseDto;
 using tutorium.Services.CourseService;
 using Microsoft.AspNetCore.Mvc;
 using tutorium.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace tutorium.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class CourseController : ControllerBase

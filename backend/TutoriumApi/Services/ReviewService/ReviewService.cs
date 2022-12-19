@@ -24,8 +24,8 @@ namespace tutorium.Services.CourseService
 
         public async Task<GetReviewDto> CreateReview(CreateReviewDto createReviewDto)
         {
-            User? student = await _context.SUsers
-                .Where(s => s.Id == Utils.Utility.GetUserId(_httpContextAccessor))
+            User? student = await _context.Users
+                .Where(s => s.Id == Auth.GetUserId(_httpContextAccessor))
                 .Include(s => s.Bookings)
                 .Include(s => s.Reviews)
                 .FirstOrDefaultAsync();
@@ -75,7 +75,7 @@ namespace tutorium.Services.CourseService
             {
                 throw new NotFoundException("No such review.");
             }
-            if (review.AffilatedStudentId != Utils.Utility.GetUserId(_httpContextAccessor))
+            if (review.AffilatedStudentId != Auth.GetUserId(_httpContextAccessor))
             {
                 throw new UnauthorizedException("This review does not belong to current student.");
             }
@@ -91,7 +91,7 @@ namespace tutorium.Services.CourseService
 
             if (review == null)
                 throw new NotFoundException("There is no such review.");
-            if (review.AffilatedStudentId != Utils.Utility.GetUserId(_httpContextAccessor))
+            if (review.AffilatedStudentId != Auth.GetUserId(_httpContextAccessor))
                 throw new BadRequestException("This review does not belong to current student.");
             if (updateReviewDto.Rating != null)
             {

@@ -1,16 +1,13 @@
-using tutorium.Dtos.User;
-using tutorium.Models;
-using tutorium.Utils;
+using tutorium.Dtos.UserDto;
 
 namespace tutorium.Services.AuthService
 {
     public interface IAuthService
     {
-        Task<ServiceResponse<int>> Register(UserRegisterDto userDto);
-        Task<ServiceResponse<GetUserDto>> Login(UserLoginDto userLoginDto);
-        Task<bool> UserExists(string username);
-        Task<ServiceResponse<GetUserDto>> check();
-        Task<ServiceResponse<int>> IdOfUser(string email);
-        Task<ServiceResponse<int>> IdOfUser();
+        Task<GetUserDto> CheckUser();
+        Task<bool> DoesUserExist(string username);
+        Task<int> GetUserId(string email);
+        Task<GetUserDto> Login(LoginUserDto userLoginDto);
+        Task<int> Register(SignupUserDto userRegisterDto);
     }
 }

@@ -1,13 +1,10 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using tutorium.Models;
-using tutorium.Dtos.User;
+using tutorium.Dtos.UserDto;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using AutoMapper;
 using tutorium.Data;
 using tutorium.Utils;
+using tutorium.Exceptions;
 
 namespace tutorium.Services.AuthService
 {
@@ -18,157 +15,82 @@ namespace tutorium.Services.AuthService
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthService(TutoriumContext context, IConfiguration configuration, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public AuthService(TutoriumContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IMapper mapper)
         {
             _configuration = configuration;
             _mapper = mapper;
             _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
-        public async Task<ServiceResponse<GetUserDto>> check()
+
+        public async Task<GetUserDto> CheckUser()
         {
-            ServiceResponse<GetUserDto> response = new ServiceResponse<GetUserDto>();
-            User? user = await _context.SUsers.FirstOrDefaultAsync(u => u.Id == Utils.Utility.GetUserId(_httpContextAccessor));
-            response.Data = _mapper.Map<GetUserDto>(user);
-            return response;
-        }
-        public async Task<ServiceResponse<GetUserDto>> Login(UserLoginDto userLoginDto)
-        {
-            ServiceResponse<GetUserDto> response = new ServiceResponse<GetUserDto>();
-            User? user = await _context.SUsers.FirstOrDefaultAsync(x => x.Email.ToLower().Equals(userLoginDto.Email.ToLower()));
+            User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == Auth.GetUserId(_httpContextAccessor));
             if (user == null)
             {
-                response.Success = false;
-                response.Message = "User not found.";
+                throw new BadRequestException("No user is logged in.");
             }
-            else if (!VerifyPasswordHash(userLoginDto.Password, user.PasswordHash, user.PasswordSalt) && !VerifyPasswordHash(userLoginDto.Password, user.SecondPasswordHash, user.PasswordSalt))
+            return _mapper.Map<GetUserDto>(user);
+        }
+
+        public async Task<bool> DoesUserExist(string username)  // TODO: We do not use it?
+        {
+            return await _context.Users.AnyAsync(x => x.Email.ToLower().Equals(username.ToLower()));
+        }
+
+        public async Task<int> GetUserId(string email)
+        {
+            User? user = await _context.Users.FirstOrDefaultAsync(x => x.Email.Equals(email));
+            if (user == null)
             {
-                response.Success = false;
-                response.Message = "Wrong password";
+                throw new BadRequestException("There is no such user.");
+            }
+            return user.Id;
+        }
+
+        public async Task<GetUserDto> Login(LoginUserDto loginUserDto)
+        {
+            User? user = await _context.Users.FirstOrDefaultAsync(x => x.Email.ToLower().Equals(loginUserDto.Email.ToLower()));
+            if (user == null)
+            {
+                throw new NotFoundException("User not found.");
+            }
+            else if (!Auth.VerifyPasswordHash(loginUserDto.Password, user.PasswordHash, user.PasswordSalt) && !Auth.VerifyPasswordHash(loginUserDto.Password, user.SecondPasswordHash, user.PasswordSalt))
+            {
+                throw new BadRequestException("Wrong password.");
             }
             else if (!user.EmailVerifiedStatus)
             {
-                response.Success = false;
-                response.Message = "Please verify your account";
+                throw new BadRequestException("Please verify your email.");
             }
-            else
-            {
-                response.Data = _mapper.Map<GetUserDto>(user);
-                response.Data.Token = CreateToken(user);
-                response.Data.UserType = user.UserType;
-            }
-            return response;
+
+            GetUserDto getUserDto = _mapper.Map<GetUserDto>(user);
+            getUserDto.Token = Auth.CreateToken(user, _configuration.GetSection("AppSettings:Token").Value!);
+            return getUserDto;
         }
 
-        public async Task<ServiceResponse<int>> Register(UserRegisterDto userDto)
+        public async Task<int> Register(SignupUserDto signupUserDto)
         {
-            ServiceResponse<int> response = new ServiceResponse<int>();
-            User? newUser = await _context.SUsers.FirstOrDefaultAsync(x => x.Email.ToLower().Equals(userDto.Email.ToLower()));
+            User? newUser = await _context.Users.FirstOrDefaultAsync(x => x.Email.ToLower().Equals(signupUserDto.Email.ToLower()));
             if (newUser != null)
             {
-                if (newUser.EmailVerifiedStatus)
-                {
-                    response.Success = false;
-                    response.Message = "User already exists.";
-                    return response;
-                }
+                throw new BadRequestException("User already exists.");
             }
-            if (newUser != null)
-                _context.SUsers.Remove(newUser);
-            newUser = new User { Email = userDto.Email, FirstName = userDto.Name, LastName = userDto.LastName };
 
-            Utils.Utility.CreateHash(userDto.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            newUser = new User { Email = signupUserDto.Email, FirstName = signupUserDto.FirstName, LastName = signupUserDto.LastName };
+            Auth.CreateHash(signupUserDto.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            string code = Auth.GenerateRandomCode();
 
+            newUser.EmailVerificationCode = code;
+            newUser.EmailVerifiedStatus = true; // Utility.SendMail(newUser.Email, code, false);
             newUser.PasswordHash = passwordHash;
             newUser.SecondPasswordHash = passwordHash;
             newUser.PasswordSalt = passwordSalt;
-            newUser.EmailVerifiedStatus = true;
-            newUser.UserType = UserType.Tutor;
-            string code = Utils.Utility.GenerateRandomCode();
-            // Utility.SendMail(newUser.Email, code, false);
-            newUser.EmailVerificationCode = code;
-            _context.SUsers.Add(newUser);
+            newUser.UserType = signupUserDto.UserType;
+
+            _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
-            response.Data = newUser.Id;
-            return response;
+            return newUser.Id;
         }
-
-        public async Task<bool> UserExists(string username)
-        {
-            if (await _context.SUsers.AnyAsync(x => x.Email.ToLower().Equals(username.ToLower())))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
-        {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
-            {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                for (int i = 0; i < computedHash.Length; i++)
-                {
-                    if (computedHash[i] != passwordHash[i])
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
-
-        private string CreateToken(User user)
-        {
-            List<Claim> claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.UserType.ToString(), ClaimValueTypes.Integer32),
-                new Claim(ClaimTypes.Name, user.Email)
-            };
-
-            SymmetricSecurityKey key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value)
-            );
-
-            SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(1),
-                SigningCredentials = creds
-            };
-
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
-
-            return tokenHandler.WriteToken(token);
-        }
-
-        public async Task<ServiceResponse<int>> IdOfUser(string email)
-        {
-            ServiceResponse<int> serviceResponse = new ServiceResponse<int>();
-            User? dbUser = await _context.SUsers.FirstOrDefaultAsync(x => x.Email.Equals(email));
-            if (dbUser == null)
-            {
-                serviceResponse.Success = false;
-                serviceResponse.Message = "There is no such user";
-                return serviceResponse;
-            }
-
-            serviceResponse.Data = dbUser.Id;
-            return serviceResponse;
-        }
-
-        public Task<ServiceResponse<int>> IdOfUser()
-        {
-            ServiceResponse<int> serviceResponse = new ServiceResponse<int>();
-            // serviceResponse.Message = Utils.Utility.GetUserId(_httpContextAccessor).ToString();
-            // console log id of user 
-            Console.WriteLine(Utils.Utility.GetUserId(_httpContextAccessor));
-            return Task.FromResult(serviceResponse);
-        }
-
     }
 }
