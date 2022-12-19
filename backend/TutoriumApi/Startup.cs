@@ -25,10 +25,11 @@ namespace tutorium
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // IServiceCollection serviceCollection = services.AddDbContext<TutoriumContext>(x => x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddDbContext<TutoriumContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
             services.AddControllers(options => options.Filters.Add(typeof(ExceptionHandlingFilter)));
-            services.AddEndpointsApiExplorer();  // TODO: I do not know what this do.
+            services.AddEndpointsApiExplorer();
+            services.AddAutoMapper(typeof(Startup));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v0", new OpenApiInfo { Title = "Tutorium", Version = "v0" });
@@ -58,26 +59,23 @@ namespace tutorium
                     } });
             });
 
-            services.AddAutoMapper(typeof(Startup));
-
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII
-                        .GetBytes(Configuration.GetSection("AppSettings:Token").Value)),
+                        .GetBytes(Configuration.GetSection("AppSettings:Token").Value!)),
                     ValidateIssuer = false,
                     ValidateAudience = false
                 };
             });
 
-
+            services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IMaterialFileService, MaterialFileService>();
             services.AddScoped<IMaterialService, MaterialService>();
-            services.AddScoped<IAuthService, AuthService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddHttpContextAccessor();
             services.AddCors(

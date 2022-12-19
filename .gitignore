@@ -505,14 +505,4 @@ $RECYCLE.BIN/
 .vscode
 publish/
 
-
-backend/TutoriumApi/Migrations/*
-backend/TutoriumApi/appsettings.json
-backend/TutoriumApi/appsettings.json
-backend/TutoriumApi/Migrations/20221217193005_InitialCreation.cs
-backend/TutoriumApi/Migrations/20221217193005_InitialCreation.Designer.cs
-backend/TutoriumApi/Migrations/20221217193911_Second.cs
-backend/TutoriumApi/Migrations/20221217193911_Second.Designer.cs
-backend/TutoriumApi/Migrations/20221217225037_ThirdOne.Designer.cs
-backend/TutoriumApi/Migrations/TutoriumContextModelSnapshot.cs
-backend/TutoriumApi/Migrations/20221217225037_ThirdOne.cs
+backend/TutoriumApi/Migrations/

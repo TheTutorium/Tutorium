@@ -12,11 +12,11 @@ namespace tutorium.Models
         public int Duration { get; set; }  // In minutes
         public string Name { get; set; } = null!;  // If course is verifable then it names must be from 'VerifableCourseTypes'
         public SubjectType Subject { get; set; }
+        public VerifiedStatusType VerifiedStatus { get; set; }
 
         // Verifiable Course Attributes
         public string? DocumentPath { get; set; }
         public DateTime? ExpirationDate { get; set; }
-        public VerifiedStatusType VerifiedStatus { get; set; }
 
         // One-to-Many
         public ICollection<Booking> Bookings { get; set; } = null!;

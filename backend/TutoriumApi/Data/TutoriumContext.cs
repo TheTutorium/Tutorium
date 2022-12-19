@@ -8,57 +8,18 @@ namespace tutorium.Data
     public class TutoriumContext : DbContext
     {
         public TutoriumContext(DbContextOptions<TutoriumContext> options) : base(options) { }
-
         public DbSet<Booking> Bookings { get; set; } = null!;
         public DbSet<Course> Courses { get; set; } = null!;
         public DbSet<Material> Materials { get; set; } = null!;
         public DbSet<Review> Reviews { get; set; } = null!;
-        public DbSet<User> SUsers { get; set; } = null!;
+        public DbSet<User> Users { get; set; } = null!;
         public DbSet<WhiteboardSave> WhiteboardSaves { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             byte[] hash, salt;
-            Utils.Utility.CreateHash("tutor", out hash, out salt);
+            Auth.CreateHash("tutorium", out hash, out salt);
 
-            // Susers on affileated student, avoid cycles
-            modelBuilder.Entity<Booking>()
-                .HasOne(booking => booking.AffilatedStudent)
-                .WithMany(student => student.Bookings)
-                .HasForeignKey(booking => booking.AffilatedStudentId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Susers on affileated student, avoid cycles
-            modelBuilder.Entity<Review>()
-                .HasOne(review => review.AffilatedStudent)
-                .WithMany(student => student.Reviews)
-                .HasForeignKey(review => review.AffilatedStudentId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // reviews on affileated course, avoid cycles
-            modelBuilder.Entity<Review>()
-                .HasOne(review => review.AffilatedCourse)
-                .WithMany(course => course.Reviews)
-                .HasForeignKey(review => review.AffilatedCourseId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // materials on affileated course, avoid cycles
-            modelBuilder.Entity<Material>()
-                .HasOne(material => material.AffilatedCourse)
-                .WithMany(course => course.Materials)
-                .HasForeignKey(material => material.AffilatedCourseId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // bookings on affileated course, avoid cycles
-            modelBuilder.Entity<Booking>()
-                .HasOne(booking => booking.AffilatedCourse)
-                .WithMany(course => course.Bookings)
-                .HasForeignKey(booking => booking.AffilatedCourseId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-
-
-            // add some users
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
@@ -72,6 +33,7 @@ namespace tutorium.Data
                     PasswordSalt = salt,
                     Phone = "00905075711001",
                     PhoneVerifiedStatus = true,
+                    UserType = UserType.Student
                 },
                 new User
                 {
@@ -84,41 +46,45 @@ namespace tutorium.Data
                     SecondPasswordHash = hash,
                     PasswordSalt = salt,
                     Phone = "0000000000000",
-                    PhoneVerifiedStatus = true,
+                    PhoneVerifiedStatus = false,
+                    PhoneVerificationCode = "00000",
+                    UserType = UserType.Student
                 },
                 new User
                 {
                     Id = 3,
                     Email = "oguzhan@student",
                     EmailVerifiedStatus = false,
-                    EmailVerificationCode = "1234",
-                    FirstName = "Oguzhan",
-                    LastName = "Ozcelik",
+                    EmailVerificationCode = "00000",
+                    FirstName = "Mustafa Cagri",
+                    LastName = "Durgut",
                     PasswordHash = hash,
                     SecondPasswordHash = hash,
                     PasswordSalt = salt,
                     Phone = "0000000000000",
-                    PhoneVerifiedStatus = true,
+                    PhoneVerifiedStatus = false,
+                    PhoneVerificationCode = "00000",
+                    UserType = UserType.Student
                 },
                 new User
                 {
                     Id = 4,
-                    UserType = UserType.Tutor,
                     Description = "Selamlar",
                     Email = "ozgur@tutor",
                     EmailVerifiedStatus = true,
                     FirstName = "Halil Ozgur",
                     LastName = "Demir",
+                    ImagePath = "fake/image/path",
                     PasswordHash = hash,
                     SecondPasswordHash = hash,
                     PasswordSalt = salt,
                     Phone = "0000000000000",
                     PhoneVerifiedStatus = true,
+                    UserType = UserType.Tutor,
                 },
                 new User
                 {
                     Id = 5,
-                    UserType = UserType.Tutor,
                     Description = "Merhaba arkadaslar",
                     Email = "yusuf@tutor",
                     EmailVerifiedStatus = true,
@@ -128,8 +94,24 @@ namespace tutorium.Data
                     SecondPasswordHash = hash,
                     PasswordSalt = salt,
                     Phone = "0000000000000",
+                    PhoneVerifiedStatus = true,
+                    UserType = UserType.Tutor,
+                },
+                new User
+                {
+                    Id = 6,
+                    Description = "Merhaba arkadaslar",
+                    Email = "aybala@tutor",
+                    EmailVerifiedStatus = true,
+                    FirstName = "Aybala",
+                    LastName = "Karakaya",
+                    PasswordHash = hash,
+                    SecondPasswordHash = hash,
+                    PasswordSalt = salt,
+                    Phone = "0000000000000",
                     PhoneVerificationCode = "1234",
                     PhoneVerifiedStatus = false,
+                    UserType = UserType.Tutor,
                 }
             );
 
@@ -166,7 +148,7 @@ namespace tutorium.Data
                     DocumentPath = "/fake/path",
                     ExpirationDate = new DateTime(2023, 3, 15, 17, 0, 0),
                     VerifiedStatus = VerifiedStatusType.Verified,
-                    AffilatedTutorId = 4
+                    AffilatedTutorId = 5
                 }
             );
 
@@ -174,6 +156,7 @@ namespace tutorium.Data
                 new Material
                 {
                     Id = 1,
+                    CreatedAt = new DateTime(2023, 3, 15, 17, 0, 0),
                     Description = "dasdas",
                     DisplayName = "adsdas",
                     FilePath = "/File/Path/Fake",
@@ -182,14 +165,17 @@ namespace tutorium.Data
                 new Material
                 {
                     Id = 2,
+                    CreatedAt = new DateTime(2023, 3, 15, 17, 0, 0),
                     Description = "dasdas",
                     DisplayName = "adsdas",
                     FilePath = "/File/Path/Fake",
-                    AffilatedCourseId = 1
+                    UpdatedAt = new DateTime(2024, 3, 15, 17, 0, 0),
+                    AffilatedCourseId = 2
                 },
                 new Material
                 {
                     Id = 3,
+                    CreatedAt = new DateTime(2023, 3, 15, 17, 0, 0),
                     Description = "dasdas",
                     DisplayName = "adsdas",
                     FilePath = "/File/Path/Fake",
@@ -208,6 +194,7 @@ namespace tutorium.Data
                 new Booking
                 {
                     Id = 2,
+                    CanceledBy = CanceledBy.Student,
                     Date = new DateTime(2023, 1, 15, 8, 0, 0),
                     AffilatedCourseId = 2,
                     AffilatedStudentId = 2,
@@ -216,15 +203,17 @@ namespace tutorium.Data
                 {
                     Id = 3,
                     Date = new DateTime(2023, 1, 20, 10, 0, 0),
+                    CanceledBy = CanceledBy.Tutor,
                     AffilatedCourseId = 2,
                     AffilatedStudentId = 2,
                 },
                 new Booking
                 {
                     Id = 4,
+                    CanceledBy = CanceledBy.System,
                     Date = new DateTime(2023, 3, 30, 7, 0, 0),
                     AffilatedCourseId = 3,
-                    AffilatedStudentId = 3,
+                    AffilatedStudentId = 1,
                 }
             );
 
@@ -270,7 +259,7 @@ namespace tutorium.Data
                     CreatedAt = new DateTime(2023, 4, 30, 7, 0, 0),
                     Rating = 6.8m,
                     AffilatedCourseId = 2,
-                    AffilatedStudentId = 1,
+                    AffilatedStudentId = 2,
                 },
                 new Review
                 {
@@ -278,8 +267,8 @@ namespace tutorium.Data
                     Comment = "Vasat",
                     CreatedAt = new DateTime(2023, 5, 30, 7, 0, 0),
                     Rating = 4.8m,
-                    AffilatedCourseId = 2,
-                    AffilatedStudentId = 3,
+                    AffilatedCourseId = 3,
+                    AffilatedStudentId = 1,
                 }
             );
         }

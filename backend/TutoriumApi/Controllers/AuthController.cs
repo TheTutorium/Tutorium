@@ -1,8 +1,7 @@
-using System.Threading.Tasks;
-using tutorium.Dtos.User;
-using tutorium.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+using tutorium.Dtos.UserDto;
 using tutorium.Services.AuthService;
 using tutorium.Utils;
 
@@ -18,55 +17,39 @@ namespace tutorium.Controllers
             _authService = authService;
         }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register(UserRegisterDto request)
-        {
-            ServiceResponse<int> response = await _authService.Register(request);
-            if (!response.Success)
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
-        }
-
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login(UserLoginDto request)
-        {
-            ServiceResponse<GetUserDto> response = await _authService.Login(request);
-            if (!response.Success)
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
-        }
-
-
-        // [Authorize]
-        [HttpGet("Check")]
-        // authorize for tutors
-        [Authorize(Roles = "Tutor")]
-        public async Task<IActionResult> Check()
-        {
-            // console log hello world
-            Console.WriteLine("Hello World");
-            ServiceResponse<GetUserDto> response = await _authService.check();
-            if (!response.Success)
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
-        }
-
+        [HttpGet]
         [Authorize]
-        [HttpGet("IdOfUser")]
-        public async Task<IActionResult> IdOfUser(string email)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MessageObject), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<GetUserDto>> CheckUser()
         {
-            ServiceResponse<int> response = await _authService.IdOfUser(email);
-            if (!response.Success)
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
+            return CreatedAtAction(null, await _authService.CheckUser());
+        }
+
+        [HttpGet("id")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MessageObject), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<int>> GetUserId(string email)  // TODO: Is this necessary?
+        {
+            return Ok(await _authService.GetUserId(email));
+        }
+
+        [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MessageObject), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<GetUserDto>> Login(LoginUserDto request)
+        {
+            return Ok(await _authService.Login(request));
+        }
+
+
+        [HttpPost("register")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(MessageObject), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<int>> Register(SignupUserDto request)
+        {
+            return CreatedAtAction(null, await _authService.Register(request));
         }
     }
 }

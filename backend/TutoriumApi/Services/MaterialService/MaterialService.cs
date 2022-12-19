@@ -23,8 +23,6 @@ namespace tutorium.Services.MaterialService
             _mapper = mapper;
         }
 
-        private int? GetUserId() => 4;
-
         public async Task<GetMaterialDto> CreateMaterial(CreateMaterialDto createMaterialDto)
         {
 
@@ -37,7 +35,7 @@ namespace tutorium.Services.MaterialService
             {
                 throw new NotFoundException("There is no such course.");
             }
-            if (course.AffilatedTutorId != GetUserId())
+            if (course.AffilatedTutorId != Auth.GetUserId(_httpContextAccessor))
             {
                 throw new UnauthorizedException("Tutor does not own the course.");
             }
@@ -92,7 +90,7 @@ namespace tutorium.Services.MaterialService
             {
                 throw new NotFoundException("No such material.");
             }
-            if (material.AffilatedCourse.AffilatedTutorId != GetUserId())
+            if (material.AffilatedCourse.AffilatedTutorId != Auth.GetUserId(_httpContextAccessor))
             {
                 throw new UnauthorizedException("The tutor does not have right to delete this material");
             }
@@ -111,7 +109,7 @@ namespace tutorium.Services.MaterialService
 
             if (material == null)
                 throw new NotFoundException("There is no such material.");
-            if (material.AffilatedCourse.AffilatedTutorId != GetUserId())
+            if (material.AffilatedCourse.AffilatedTutorId != Auth.GetUserId(_httpContextAccessor))
                 throw new BadRequestException("The tutor does not have right to update this material");
             if (material.AffilatedCourse.Materials.Any(material => (material.DisplayName == updateMaterialDto.DisplayName && material.Id != materialId)))
             {
