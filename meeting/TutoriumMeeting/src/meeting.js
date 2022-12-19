@@ -116,6 +116,14 @@ peer.on("call", (call) => {
         .catch((err) => {
             console.error("Failed to get local stream", err);
         });
+    navigator.mediaDevices
+        .getUserMedia({ video: true, audio: false })
+        .then((stream) => {
+            document.getElementById("local-video").srcObject = stream;
+        })
+        .catch((err) => {
+            console.error(err);
+        });
 });
 
 // Initiate outgoing connection
@@ -149,7 +157,7 @@ let connectToPeer = () => {
         }
     });
 
-    navigator.mediaDevices
+    /*navigator.mediaDevices
         .getUserMedia({
             video: {
                 mediaSource: "screen",
@@ -158,6 +166,14 @@ let connectToPeer = () => {
         .then((stream) => {
             // Use the stream in your PeerJS connection
             conn.addStream(stream);
+        });*/
+    navigator.mediaDevices
+        .getUserMedia({ video: true, audio: false })
+        .then((stream) => {
+            document.getElementById("local-video").srcObject = stream;
+        })
+        .catch((err) => {
+            console.error(err);
         });
 
     conn.on("open", () => {
@@ -186,18 +202,18 @@ let disconnectFromPeer = () => {
 window.connectToPeer = connectToPeer;
 window.disconnectFromPeer = disconnectFromPeer;
 
-navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+/*navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-navigator.getUserMedia(
+navigator.mediaDevices.getUserMedia(
     { video: true, audio: false },
     function (stream) {
         // Set the source of the video element to the stream
-        document.getElementById("local-video").srcObject = stream;
+        
     },
     function (err) {
         console.error(err);
     }
-);
+);*/
 
 // Whiteboard Part
 
