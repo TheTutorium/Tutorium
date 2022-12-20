@@ -44,8 +44,11 @@ export const MeetingMessage: FunctionComponent<Props> = ({
                         <Grid.Column>
                             <Container textAlign="left">
                                 <p>
-                                    {exam} {exam === "" ? field : " - " + field}{" "}
-                                    {exam === "" ? lecture_name : " | " + lecture_name}
+                                    {exam === ""
+                                        ? lecture_name
+                                        : field === ""
+                                        ? exam + " - " + lecture_name
+                                        : exam + " - " + field}
                                 </p>
                             </Container>
                         </Grid.Column>
