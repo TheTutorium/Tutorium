@@ -23,7 +23,7 @@ const Meetings = () => {
                     description={element.description}
                     exam={element.exam}
                     field={element.field}
-                    lecture_name={element.lecturer_name}
+                    lecture_name={element.lecture_name}
                 />
             ))}
         </div>

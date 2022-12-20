@@ -35,7 +35,7 @@
   "scripts": {
     "beautify": "yarn run style:write && yarn run lint:write && yarn run prettier:write",
     "build": "react-scripts build",
-    "checks": "yarn run style:check && yarn run lint:check && yarn run prettier:check",
+    "checks": "yarn run style:check && yarn run lint:check",
     "eject": "react-scripts eject",
     "lint:check": "eslint -c .eslintrc \"src/**/*.{tsx,ts}\"",
     "lint:write": "eslint --fix -c .eslintrc \"src/**/*.{tsx,ts}\"",
