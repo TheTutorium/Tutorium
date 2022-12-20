@@ -29,7 +29,7 @@ namespace tutorium.Controllers
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(MessageObject), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(MessageObject),  StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(MessageObject), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GetWhiteboardSaveDto>> CreateWhiteboardSave([FromForm] CreateWhiteboardSaveDto createWhiteboardSaveDto)
         {
