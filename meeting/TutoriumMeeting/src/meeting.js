@@ -1,3 +1,10 @@
+//const fmin = require('./fmin');
+
+//const LeastSquares = require("least-squares");
+
+const maxPointForBezierCurve = 100;
+
+
 //Whiteboard Initialization
 const app = new PIXI.Application({
     antialias: true,
@@ -240,6 +247,10 @@ const getMousePos = (event) => {
     return pos;
 };
 
+var currentPoints = [];
+let pointCount = 0;
+let curve;
+
 const onMouseMove = (e) => {
     if (!isMouseButtonDown) {
         return;
@@ -287,6 +298,19 @@ const onMouseMove = (e) => {
                 "|" +
                 currentZIndex
         );
+
+        currentPoints.push(initPointer);
+        pointCount += 1;
+
+        if(pointCount >= maxPointForBezierCurve){
+            //map to bezier curve
+            curve = findBestFitCurve(currentPoints);
+
+            //-------------------
+            currentPoints = [initPointer];
+            pointCount = 1;
+        }
+
         initPointer = curMousePosRef;
         sprite.lineTo(mousePosRef.x, mousePosRef.y);
         stage.addChild(sprite);
@@ -327,10 +351,97 @@ const onMouseUp = (e) => {
             currentZIndex
     );
     isMouseButtonDown = false;
+
+    if(pointCount > 0){
+        //map to bezier curve
+
+        //------------------
+        pointCount = 0;
+        currentPoints = [];
+    }
 };
+
+
+//Bezier Curve Functions
+
+function cubicBezier(p0, p1, p2, p3, t) {
+    const cx = 3 * (p1.x - p0.x);
+    const cy = 3 * (p1.y - p0.y);
+    const bx = 3 * (p2.x - p1.x) - cx;
+    const by = 3 * (p2.y - p1.y) - cy;
+    const ax = p3.x - p0.x - cx - bx;
+    const ay = p3.y - p0.y - cy - by;
+    const x = ax * t * t * t + bx * t * t + cx * t + p0.x;
+    const y = ay * t * t * t + by * t * t + cy * t + p0.y;
+    return { x, y };
+  }
+  
+  function distance(point, curve) {
+    let minDist = Infinity;
+    for (let i = 0; i < 100; i++) { // divide the curve into 100 segments
+      const t = i / 100;
+      const curvePoint = cubicBezier(curve[0], curve[1], curve[2], curve[3], t);
+      const dist = Math.sqrt((point.x - curvePoint.x) ** 2 + (point.y - curvePoint.y) ** 2);
+      if (dist < minDist) {
+        minDist = dist;
+      }
+    }
+    return minDist;
+  }
+  
+  function totalDistance(points, curve) {
+    let totalDist = 0;
+    for (const point of points) {
+      const dist = distance(point, curve);
+      totalDist += dist;
+    }
+    return totalDist;
+  }
+  
+  function minimizeLoss(points){
+    let P0 = points[0];
+    let P3 = points[points.length - 1];
+    let X = [];
+    let Yx = [];
+    let Yy = [];
+    let delta = 1 / points.length;
+    let t = delta;
+    for (let i = 1; i < points.length - 1; i++){
+        X.push(t/(1-t));
+        Yx.push(points[1].x - (1-t) * (1-t) * (1-t) * P0.x - t * t * t * P3.x);
+        Yy.push(points[1].y - (1-t) * (1-t) * (1-t) * P0.y - t * t * t * P3.y);
+        t+=delta;
+    }
+
+    let Xlsq = {};
+    let Ylsq = {};
+
+    lsq(X,Yx, true, Xlsq);
+    lsq(X, Yy, true, Ylsq);
+
+    return [Xlsq, Ylsq];
+  }
+
+  function findBestFitCurve(points) {
+    const result = minimizeLoss(points);
+    console.log(result);
+    return result.solution;
+  }
+
+  //End of Bezier Curve Functions
 
 container.addEventListener("mousemove", onMouseMove, 0);
 
 container.addEventListener("mousedown", onMouseDown, 0);
 
 container.addEventListener("mouseup", onMouseUp, 0);
+
+/********************** */
+
+sprite = new PIXI.Graphics();
+sprite.lineStyle(2, 0xff0000, 1);
+sprite.moveTo(200, 150);
+sprite.bezierCurveTo(200, 50, 300, 150, 100, 100);
+stage.addChild(sprite);
+
+/********************** */

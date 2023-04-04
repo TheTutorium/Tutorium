@@ -52,3 +52,4 @@ const peerServer = ExpressPeerServer(listener, {
 });
 
 app.use("/peerjs", peerServer);
+//app.use("/fmin", peerServer);
