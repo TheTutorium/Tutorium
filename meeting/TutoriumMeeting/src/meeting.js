@@ -2,7 +2,7 @@
 
 //const LeastSquares = require("least-squares");
 
-const maxPointForBezierCurve = 100;
+const maxPointForBezierCurve = 50;
 
 
 //Whiteboard Initialization
@@ -260,22 +260,11 @@ const onMouseMove = (e) => {
     if (initPointer == null) return;
 
     const curMousePosRef = getMousePos(e);
-    curDistance -= Math.abs(curMousePosRef.x - mousePosRef.x) + Math.abs(curMousePosRef.y - mousePosRef.y);
+    curDistance = Math.sqrt((curMousePosRef.x - mousePosRef.x) * (curMousePosRef.x - mousePosRef.x) + (curMousePosRef.y - mousePosRef.y) * (curMousePosRef.y - mousePosRef.y));
 
-    if (curDistance > 0) {
-        sprite.clear();
-        if (currentPenType === 0) {
-            sprite.lineStyle(2, 0xff0000, 1);
-        } else if (currentPenType === 1) {
-            sprite.lineStyle(10, 0x1099bb, 1);
-        }
-        sprite.zIndex = currentZIndex;
-        sprite.moveTo(initPointer.x, initPointer.y);
+    console.log(curDistance);
 
-        mousePosRef = curMousePosRef;
-        sprite.lineTo(mousePosRef.x, mousePosRef.y);
-    } else {
-        curDistance = putDistance;
+    while (putDistance <= curDistance) {
         sprite = new PIXI.Graphics();
         if (currentPenType === 0) {
             sprite.lineStyle(2, 0xff0000, 1);
@@ -284,7 +273,29 @@ const onMouseMove = (e) => {
         }
         sprite.moveTo(initPointer.x, initPointer.y);
         sprite.zIndex = currentZIndex;
-        mousePosRef = curMousePosRef;
+
+        //Translate Towards a point
+        const translate_direction = {
+            x: curMousePosRef.x - mousePosRef.x,
+            y: curMousePosRef.y - mousePosRef.y,
+        }
+
+        const translate_length = Math.sqrt(translate_direction.x * translate_direction.x + translate_direction.y * translate_direction.y);
+
+        const translate_unitDirection = {
+            x: translate_direction.x / translate_length,
+            y: translate_direction.y / translate_length,
+          };
+
+        const translate_displacement = {
+            x: translate_unitDirection.x * putDistance,
+            y: translate_unitDirection.y * putDistance,
+          };
+
+        mousePosRef.x += translate_displacement.x;
+        mousePosRef.y += translate_displacement.y;
+
+        //********************** */
         otherPeer.send(
             initPointer.x +
                 "|" +
@@ -301,19 +312,26 @@ const onMouseMove = (e) => {
 
         currentPoints.push(initPointer);
         pointCount += 1;
+        console.log("point Count: " + pointCount);
 
         if(pointCount >= maxPointForBezierCurve){
             //map to bezier curve
             curve = findBestFitCurve(currentPoints);
-
+            var curve_sprite = new PIXI.Graphics();
+            curve_sprite.lineStyle(4, 0x000000, 0.5);
+            curve_sprite.moveTo(currentPoints[0].x, currentPoints[0].y);
+            curve_sprite.bezierCurveTo(curve[0].b, curve[1].b, curve[0].m, curve[1].m, currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
+            stage.addChild(curve_sprite);
             //-------------------
+
             currentPoints = [initPointer];
             pointCount = 1;
         }
 
-        initPointer = curMousePosRef;
+        initPointer = mousePosRef;
         sprite.lineTo(mousePosRef.x, mousePosRef.y);
         stage.addChild(sprite);
+        curDistance = Math.sqrt((curMousePosRef.x - mousePosRef.x) * (curMousePosRef.x - mousePosRef.x) + (curMousePosRef.y - mousePosRef.y) * (curMousePosRef.y - mousePosRef.y));
     }
 };
 
@@ -408,8 +426,8 @@ function cubicBezier(p0, p1, p2, p3, t) {
     let t = delta;
     for (let i = 1; i < points.length - 1; i++){
         X.push(t/(1-t));
-        Yx.push(points[1].x - (1-t) * (1-t) * (1-t) * P0.x - t * t * t * P3.x);
-        Yy.push(points[1].y - (1-t) * (1-t) * (1-t) * P0.y - t * t * t * P3.y);
+        Yx.push((points[i].x - (1-t) * (1-t) * (1-t) * P0.x - t * t * t * P3.x)/(3 * (1-t) * (1-t) * t));
+        Yy.push((points[i].y - (1-t) * (1-t) * (1-t) * P0.y - t * t * t * P3.y)/(3 * (1-t) * (1-t) * t));
         t+=delta;
     }
 
@@ -425,7 +443,7 @@ function cubicBezier(p0, p1, p2, p3, t) {
   function findBestFitCurve(points) {
     const result = minimizeLoss(points);
     console.log(result);
-    return result.solution;
+    return result;
   }
 
   //End of Bezier Curve Functions
