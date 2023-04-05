@@ -89,19 +89,23 @@ peer.on("connection", (conn) => {
             let splittedMessage = data.split("|");
             let initX = parseFloat(splittedMessage[0]);
             let initY = parseFloat(splittedMessage[1]);
-            let finalX = parseFloat(splittedMessage[2]);
-            let finalY = parseFloat(splittedMessage[3]);
-            currentZIndex = parseFloat(splittedMessage[5]);
+            let control1x = parseFloat(splittedMessage[2]);
+            let control1y = parseFloat(splittedMessage[3]);
+            let control2x = parseFloat(splittedMessage[4]);
+            let control2y = parseFloat(splittedMessage[5]);
+            let finalX = parseFloat(splittedMessage[6]);
+            let finalY = parseFloat(splittedMessage[7]);
+            currentZIndex = parseFloat(splittedMessage[8]);
 
             sprite = new PIXI.Graphics();
-            if (parseFloat(splittedMessage[4]) == 0) {
+            if (parseFloat(splittedMessage[9]) == 0) {
                 sprite.lineStyle(2, 0xff0000, 1);
-            } else if (parseFloat(splittedMessage[4]) == 1) {
+            } else if (parseFloat(splittedMessage[9]) == 1) {
                 sprite.lineStyle(10, 0x1099bb, 1);
             }
             sprite.zIndex = currentZIndex;
             sprite.moveTo(initX, initY);
-            sprite.lineTo(finalX, finalY);
+            sprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
 
             stage.addChild(sprite);
         }
@@ -146,21 +150,26 @@ let connectToPeer = () => {
             let splittedMessage = data.split("|");
             let initX = parseFloat(splittedMessage[0]);
             let initY = parseFloat(splittedMessage[1]);
-            let finalX = parseFloat(splittedMessage[2]);
-            let finalY = parseFloat(splittedMessage[3]);
-            currentZIndex = parseFloat(splittedMessage[5]);
+            let control1x = parseFloat(splittedMessage[2]);
+            let control1y = parseFloat(splittedMessage[3]);
+            let control2x = parseFloat(splittedMessage[4]);
+            let control2y = parseFloat(splittedMessage[5]);
+            let finalX = parseFloat(splittedMessage[6]);
+            let finalY = parseFloat(splittedMessage[7]);
+            currentZIndex = parseFloat(splittedMessage[8]);
 
             sprite = new PIXI.Graphics();
-            if (parseFloat(splittedMessage[4]) == 0) {
+            if (parseFloat(splittedMessage[9]) == 0) {
                 sprite.lineStyle(2, 0xff0000, 1);
-            } else if (parseFloat(splittedMessage[4]) == 1) {
+            } else if (parseFloat(splittedMessage[9]) == 1) {
                 sprite.lineStyle(10, 0x1099bb, 1);
             }
             sprite.zIndex = currentZIndex;
             sprite.moveTo(initX, initY);
-            sprite.lineTo(finalX, finalY);
+            sprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
 
             stage.addChild(sprite);
+        
         }
     });
 
@@ -248,6 +257,7 @@ const getMousePos = (event) => {
 };
 
 var currentPoints = [];
+var currentSprites = [];
 let pointCount = 0;
 let curve;
 
@@ -259,13 +269,14 @@ const onMouseMove = (e) => {
     // clearSpriteRef(annoRef)
     if (initPointer == null) return;
 
+
+    /// Drawing
     const curMousePosRef = getMousePos(e);
     curDistance = Math.sqrt((curMousePosRef.x - mousePosRef.x) * (curMousePosRef.x - mousePosRef.x) + (curMousePosRef.y - mousePosRef.y) * (curMousePosRef.y - mousePosRef.y));
 
-    console.log(curDistance);
-
     while (putDistance <= curDistance) {
         sprite = new PIXI.Graphics();
+
         if (currentPenType === 0) {
             sprite.lineStyle(2, 0xff0000, 1);
         } else if (currentPenType === 1) {
@@ -292,47 +303,69 @@ const onMouseMove = (e) => {
             y: translate_unitDirection.y * putDistance,
           };
 
-        mousePosRef.x += translate_displacement.x;
-        mousePosRef.y += translate_displacement.y;
+        mousePosRef = { x: mousePosRef.x + translate_displacement.x,
+                        y: mousePosRef.y + translate_displacement.y,}
 
         //********************** */
-        otherPeer.send(
-            initPointer.x +
-                "|" +
-                initPointer.y +
-                "|" +
-                mousePosRef.x +
-                "|" +
-                mousePosRef.y +
-                "|" +
-                currentPenType +
-                "|" +
-                currentZIndex
-        );
+        
 
         currentPoints.push(initPointer);
         pointCount += 1;
-        console.log("point Count: " + pointCount);
 
         if(pointCount >= maxPointForBezierCurve){
             //map to bezier curve
             curve = findBestFitCurve(currentPoints);
             var curve_sprite = new PIXI.Graphics();
-            curve_sprite.lineStyle(4, 0x000000, 0.5);
+            if (currentPenType === 0) {
+                curve_sprite.lineStyle(2, 0xff0000, 1);
+            } else if (currentPenType === 1) {
+                curve_sprite.lineStyle(10, 0x1099bb, 1);
+            }
+            //curve_sprite.lineStyle(4, 0x000000, 0.5);
             curve_sprite.moveTo(currentPoints[0].x, currentPoints[0].y);
             curve_sprite.bezierCurveTo(curve[0].b, curve[1].b, curve[0].m, curve[1].m, currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
             stage.addChild(curve_sprite);
             //-------------------
+            //Send curve info
+            otherPeer.send(
+                currentPoints[0].x +
+                    "|" +
+                    currentPoints[0].y +
+                    "|" +
+                    curve[0].b +
+                    "|" +
+                    curve[1].b +
+                    "|" +
+                    curve[0].m +
+                    "|" +
+                    curve[1].m +
+                    "|" +
+                    currentPoints[currentPoints.length - 1].x +
+                    "|" +
+                    currentPoints[currentPoints.length - 1].y +
+                    "|" +
+                    currentPenType +
+                    "|" +
+                    currentZIndex
+            );
+            //delete previous drawing
+            currentSprites.forEach(element => {
+                stage.removeChild(element);
+            });
 
             currentPoints = [initPointer];
+            currentSprites = [];
             pointCount = 1;
         }
 
         initPointer = mousePosRef;
         sprite.lineTo(mousePosRef.x, mousePosRef.y);
         stage.addChild(sprite);
+        currentSprites.push(sprite);
+
         curDistance = Math.sqrt((curMousePosRef.x - mousePosRef.x) * (curMousePosRef.x - mousePosRef.x) + (curMousePosRef.y - mousePosRef.y) * (curMousePosRef.y - mousePosRef.y));
     }
+    /// Drawing End
 };
 
 const onMouseDown = (e) => {
@@ -344,44 +377,86 @@ const onMouseDown = (e) => {
         sprite.lineStyle(2, 0xff0000, 1);
     } else if (currentPenType === 1) {
         sprite.lineStyle(10, 0x1099bb, 1);
+    } else if (currentPenType === 2){ // Typing
+        console.log("Typing");
+        const mouseX = e.clientX - app.renderer.view.offsetLeft;
+        const mouseY = e.clientY - app.renderer.view.offsetTop;
+        const text = new PIXI.Text('Hello World', {
+            fontFamily: 'Arial',
+            fontSize: 36,
+            fill: 0x000000,
+            align: 'left'
+          });
+        text.zIndex = currentZIndex;
+        text.x = mouseX;
+        text.y = mouseY;
+        //text.moveTo(initPointer.x, initPointer.y);
+        stage.addChild(text);
     }
-    sprite.moveTo(initPointer.x, initPointer.y);
-    sprite.lineTo(mousePosRef.x, mousePosRef.y);
+    //sprite.moveTo(initPointer.x, initPointer.y);
+    //sprite.lineTo(mousePosRef.x, mousePosRef.y);
 
-    stage.addChild(sprite);
+    //stage.addChild(sprite);
 
     isMouseButtonDown = true;
 
-    console.log(mousePosRef);
+    //console.log(mousePosRef);
 };
+
+
 const onMouseUp = (e) => {
-    otherPeer.send(
-        initPointer.x +
-            "|" +
-            initPointer.y +
-            "|" +
-            getMousePos(e).x +
-            "|" +
-            getMousePos(e).y +
-            "|" +
-            currentPenType +
-            "|" +
-            currentZIndex
-    );
     isMouseButtonDown = false;
 
     if(pointCount > 0){
         //map to bezier curve
-
+        curve = findBestFitCurve(currentPoints);
+        var curve_sprite = new PIXI.Graphics();
+        if (currentPenType === 0) {
+            curve_sprite.lineStyle(2, 0xff0000, 1);
+        } else if (currentPenType === 1) {
+            curve_sprite.lineStyle(10, 0x1099bb, 1);
+        }
+        //curve_sprite.lineStyle(4, 0x000000, 0.5);
+        curve_sprite.moveTo(currentPoints[0].x, currentPoints[0].y);
+        curve_sprite.bezierCurveTo(curve[0].b, curve[1].b, curve[0].m, curve[1].m, currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
+        stage.addChild(curve_sprite);
         //------------------
+        //Send curve info
+        otherPeer.send(
+            currentPoints[0].x +
+                "|" +
+                currentPoints[0].y +
+                "|" +
+                curve[0].b +
+                "|" +
+                curve[1].b +
+                "|" +
+                curve[0].m +
+                "|" +
+                curve[1].m +
+                "|" +
+                currentPoints[currentPoints.length - 1].x +
+                "|" +
+                currentPoints[currentPoints.length - 1].y +
+                "|" +
+                currentPenType +
+                "|" +
+                currentZIndex
+        );
+        //delete previous drawing
+        currentSprites.forEach(element => {
+            stage.removeChild(element);
+        });
+
         pointCount = 0;
         currentPoints = [];
+        currentSprites = [];
     }
 };
 
 
 //Bezier Curve Functions
-
+/*
 function cubicBezier(p0, p1, p2, p3, t) {
     const cx = 3 * (p1.x - p0.x);
     const cy = 3 * (p1.y - p0.y);
@@ -415,7 +490,7 @@ function cubicBezier(p0, p1, p2, p3, t) {
     }
     return totalDist;
   }
-  
+  */
   function minimizeLoss(points){
     let P0 = points[0];
     let P3 = points[points.length - 1];
@@ -442,7 +517,6 @@ function cubicBezier(p0, p1, p2, p3, t) {
 
   function findBestFitCurve(points) {
     const result = minimizeLoss(points);
-    console.log(result);
     return result;
   }
 
@@ -454,12 +528,3 @@ container.addEventListener("mousedown", onMouseDown, 0);
 
 container.addEventListener("mouseup", onMouseUp, 0);
 
-/********************** */
-
-sprite = new PIXI.Graphics();
-sprite.lineStyle(2, 0xff0000, 1);
-sprite.moveTo(200, 150);
-sprite.bezierCurveTo(200, 50, 300, 150, 100, 100);
-stage.addChild(sprite);
-
-/********************** */
