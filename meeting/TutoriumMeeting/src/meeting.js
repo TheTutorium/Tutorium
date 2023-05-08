@@ -8,9 +8,9 @@ const maxPointForBezierCurve = 50;
 //Whiteboard Initialization
 const app = new PIXI.Application({
     antialias: true,
-    background: "#1099bb",
-    width: 400,
-    height: 300,
+    background: "#ffffff",
+    width: window.innerWidth * 0.4,
+    height: window.innerHeight * 0.5,
 });
 
 window.addEventListener("resize", () => {
@@ -239,6 +239,15 @@ let currentPenType = 0;
 const changePenType = (type) => {
     currentPenType = type;
     currentZIndex++;
+
+    // Get the previously selected button and remove its selected status
+    const prevButton = document.querySelector('.selected-button');
+    prevButton.classList.remove('selected-button');
+
+    // Get the currently selected button and add its selected status
+    const currButton = document.querySelector(`#tool-button-${type}`);
+    currButton.classList.add('selected-button');
+
     console.log(currentPenType);
     console.log(currentZIndex);
 };

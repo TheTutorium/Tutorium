@@ -9,16 +9,39 @@ body {
     margin: 3vh 3vw;
 }
 
-#video-container {
+#video-container{
     display: flex;
     justify-content: center;
-    margin: 3vh 3vw;
+    flex-direction: column;
+}
+
+.hidden {
+    display: none;
+}
+
+.white-board canvas {
+    border: 1px solid black;
+}
+
+.selected-button{
+        background-color: darkblue;
+        color: white;
+}
+
+.tool-additionals{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 }
 
 #video-container video {
     margin: 3vh 3vw;
-    width: 40vw;
     height: 28vh;
+}
+
+#main-container{
+    display: flex;
+    justify-content: space-around;
 }
 
 #tools {

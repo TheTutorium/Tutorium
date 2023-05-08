@@ -40,27 +40,51 @@
         </li>
       </ul>
     </nav>
+    <div id="main-container">
+      <div id="video-container">
+        <video class="remote-video" autoplay></video>
+      </div>
     <div class="white-board">
 
     </div>
+    <div id="video-container">
+      <video id="local-video" autoplay></video>
+    </div>
+  </div>
     <div id="tools">
-    <button onclick="changePenType(0)" class="tool">
+    <button id="tool-button-0" onclick="changePenType(0)" class="tool selected-button">
       Pen
     </button>
-    <button onclick="changePenType(1)" class="tool">
+    <button id="tool-button-1" onclick="changePenType(1)" class="tool">
       Eraser
     </button>
-    <button onclick="changePenType(2)" class="tool">
+    <button id="tool-button-2" onclick="changePenType(2)" class="tool">
       Text
     </button>
-    <button id="share-screen-button" class="tool">
+    <button id="share-screen-button" class="tool hidden">
       Share Screen
     </button>
   </div>
 
-  <div id="video-container">
-    <video class="remote-video" autoplay></video>
-    <video id="local-video" autoplay></video>
+
+
+  <div id="button-0-tools" class="tool-additionals">
+    <label for="pen-size">Pen Size:</label>
+    <input type="range" id="pen-size" min="1" max="10" value="2">
+  
+    <label for="pen-color">Pen Color:</label>
+    <select id="pen-color">
+      <option value="black">Black</option>
+      <option value="red">Red</option>
+      <option value="green">Green</option>
+      <option value="blue">Blue</option>
+    </select>
+  </div>
+  <div id="button-1-tools" class="tool-additionals hidden">
+
+  </div>
+  <div id="button-2-tools" class="tool-additionals hidden">
+
   </div>
     
     
