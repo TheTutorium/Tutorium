@@ -4,6 +4,11 @@
 
 const maxPointForBezierCurve = 50;
 
+const CHECK_STEPS = 5;
+
+const MAX_BERR = 3;
+const MAX_MERR = 1;
+
 
 //Whiteboard Initialization
 const app = new PIXI.Application({
@@ -321,9 +326,66 @@ const onMouseMove = (e) => {
         currentPoints.push(initPointer);
         pointCount += 1;
 
+        //Change to look each time after a number of points are placed
+        if(pointCount % CHECK_STEPS == 0){
+            //map to bezier curve
+            curve = findBestFitCurve(currentPoints);
+            /*
+            console.log("berr" + (curve[0].bErr + curve[1].bErr));
+            console.log("merr" + (curve[0].mErr + curve[1].mErr));*/
+            var curve_sprite = new PIXI.Graphics();
+            if (currentPenType === 0) {
+                curve_sprite.lineStyle(2, 0xff0000, 1);
+            } else if (currentPenType === 1) {
+                curve_sprite.lineStyle(10, 0x1099bb, 1);
+            }
+            //curve_sprite.lineStyle(4, 0x000000, 0.5);
+
+            if(curve[0].bErr + curve[1].bErr > MAX_BERR || curve[0].mErr + curve[1].mErr > MAX_MERR){
+                curve_sprite.moveTo(currentPoints[0].x, currentPoints[0].y);
+                curve_sprite.bezierCurveTo(curve[0].b, curve[1].b, curve[0].m, curve[1].m, currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
+                stage.addChild(curve_sprite);
+                //-------------------
+                //Send curve info
+                otherPeer.send(
+                    currentPoints[0].x +
+                        "|" +
+                        currentPoints[0].y +
+                        "|" +
+                        curve[0].b +
+                        "|" +
+                        curve[1].b +
+                        "|" +
+                        curve[0].m +
+                        "|" +
+                        curve[1].m +
+                        "|" +
+                        currentPoints[currentPoints.length - 1].x +
+                        "|" +
+                        currentPoints[currentPoints.length - 1].y +
+                        "|" +
+                        currentPenType +
+                        "|" +
+                        currentZIndex
+                );
+                //delete previous drawing
+                currentSprites.forEach(element => {
+                    stage.removeChild(element);
+                });
+    
+                currentPoints = [initPointer];
+                currentSprites = [];
+                pointCount = 1;
+            }
+            
+        }
+        //*************************************** */
+
+/*
         if(pointCount >= maxPointForBezierCurve){
             //map to bezier curve
             curve = findBestFitCurve(currentPoints);
+            console.log(curve);
             var curve_sprite = new PIXI.Graphics();
             if (currentPenType === 0) {
                 curve_sprite.lineStyle(2, 0xff0000, 1);
@@ -365,7 +427,7 @@ const onMouseMove = (e) => {
             currentPoints = [initPointer];
             currentSprites = [];
             pointCount = 1;
-        }
+        }*/
 
         initPointer = mousePosRef;
         sprite.lineTo(mousePosRef.x, mousePosRef.y);
@@ -419,6 +481,7 @@ const onMouseUp = (e) => {
     if(pointCount > 0){
         //map to bezier curve
         curve = findBestFitCurve(currentPoints);
+        console.log(curve);
         var curve_sprite = new PIXI.Graphics();
         if (currentPenType === 0) {
             curve_sprite.lineStyle(2, 0xff0000, 1);
