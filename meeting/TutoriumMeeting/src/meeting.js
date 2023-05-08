@@ -9,6 +9,39 @@ const CHECK_STEPS = 5;
 const MAX_BERR = 3;
 const MAX_MERR = 1;
 
+var pen_size = 2;
+var pen_color = "0x000000";
+var eraser_size = 10;
+
+
+const penSizeInput = document.getElementById("pen-size");
+
+// listen for changes to the pen size input
+penSizeInput.addEventListener("input", () => {
+  // get the new pen size value
+  pen_size = parseInt(penSizeInput.value);
+  
+});
+
+const eraserSizeInput = document.getElementById("eraser-size");
+
+// listen for changes to the pen size input
+eraserSizeInput.addEventListener("input", () => {
+  // get the new pen size value
+  eraser_size = parseInt(eraserSizeInput.value);
+  
+});
+
+// get the pen color select element
+const penColorSelect = document.getElementById("pen-color");
+
+// listen for changes to the pen color select
+penColorSelect.addEventListener("change", () => {
+  // get the new pen color value
+  pen_color = parseInt(penColorSelect.value);
+  
+});
+
 
 //Whiteboard Initialization
 const app = new PIXI.Application({
@@ -101,12 +134,19 @@ peer.on("connection", (conn) => {
             let finalX = parseFloat(splittedMessage[6]);
             let finalY = parseFloat(splittedMessage[7]);
             currentZIndex = parseFloat(splittedMessage[8]);
+            let tempPenSize = parseInt(splittedMessage[10]);
+            let tempPenColor = parseInt(splittedMessage[11]);
+            let tempEraserSize = parseInt(splittedMessage[12]);
 
+            console.log(tempPenSize);
+            console.log(tempPenColor);
+            console.log(data);
+            
             sprite = new PIXI.Graphics();
             if (parseFloat(splittedMessage[9]) == 0) {
-                sprite.lineStyle(2, 0xff0000, 1);
+                sprite.lineStyle(tempPenSize, tempPenColor, 1);
             } else if (parseFloat(splittedMessage[9]) == 1) {
-                sprite.lineStyle(10, 0x1099bb, 1);
+                sprite.lineStyle(tempEraserSize, 0xffffff, 1);
             }
             sprite.zIndex = currentZIndex;
             sprite.moveTo(initX, initY);
@@ -162,12 +202,19 @@ let connectToPeer = () => {
             let finalX = parseFloat(splittedMessage[6]);
             let finalY = parseFloat(splittedMessage[7]);
             currentZIndex = parseFloat(splittedMessage[8]);
+            let tempPenSize = parseInt(splittedMessage[10]);
+            let tempPenColor = parseInt(splittedMessage[11]);
+            let tempEraserSize = parseInt(splittedMessage[12]);
+
+            console.log(tempPenSize);
+            console.log(tempPenColor);
+
 
             sprite = new PIXI.Graphics();
             if (parseFloat(splittedMessage[9]) == 0) {
-                sprite.lineStyle(2, 0xff0000, 1);
+                sprite.lineStyle(tempPenSize, tempPenColor, 1);
             } else if (parseFloat(splittedMessage[9]) == 1) {
-                sprite.lineStyle(10, 0x1099bb, 1);
+                sprite.lineStyle(tempEraserSize, 0xffffff, 1);
             }
             sprite.zIndex = currentZIndex;
             sprite.moveTo(initX, initY);
@@ -242,6 +289,13 @@ let currentZIndex = 0;
 let currentPenType = 0;
 
 const changePenType = (type) => {
+    
+    const prevTools = document.querySelector(`#button-${currentPenType}-tools`);
+    prevTools.classList.add('hidden');
+
+    const currTools = document.querySelector(`#button-${type}-tools`);
+    currTools.classList.remove('hidden');
+    
     currentPenType = type;
     currentZIndex++;
 
@@ -252,6 +306,8 @@ const changePenType = (type) => {
     // Get the currently selected button and add its selected status
     const currButton = document.querySelector(`#tool-button-${type}`);
     currButton.classList.add('selected-button');
+
+    
 
     console.log(currentPenType);
     console.log(currentZIndex);
@@ -292,9 +348,9 @@ const onMouseMove = (e) => {
         sprite = new PIXI.Graphics();
 
         if (currentPenType === 0) {
-            sprite.lineStyle(2, 0xff0000, 1);
+            sprite.lineStyle(pen_size, pen_color, 1);
         } else if (currentPenType === 1) {
-            sprite.lineStyle(10, 0x1099bb, 1);
+            sprite.lineStyle(eraser_size, 0xffffff, 1);
         }
         sprite.moveTo(initPointer.x, initPointer.y);
         sprite.zIndex = currentZIndex;
@@ -335,9 +391,9 @@ const onMouseMove = (e) => {
             console.log("merr" + (curve[0].mErr + curve[1].mErr));*/
             var curve_sprite = new PIXI.Graphics();
             if (currentPenType === 0) {
-                curve_sprite.lineStyle(2, 0xff0000, 1);
+                curve_sprite.lineStyle(pen_size, pen_color, 1);
             } else if (currentPenType === 1) {
-                curve_sprite.lineStyle(10, 0x1099bb, 1);
+                curve_sprite.lineStyle(eraser_size, 0xffffff, 1);
             }
             //curve_sprite.lineStyle(4, 0x000000, 0.5);
 
@@ -366,7 +422,13 @@ const onMouseMove = (e) => {
                         "|" +
                         currentPenType +
                         "|" +
-                        currentZIndex
+                        currentZIndex +
+                        "|" +
+                        pen_size +
+                        "|" +
+                        pen_color +
+                        "|" + 
+                        eraser_size
                 );
                 //delete previous drawing
                 currentSprites.forEach(element => {
@@ -445,9 +507,9 @@ const onMouseDown = (e) => {
 
     sprite = new PIXI.Graphics();
     if (currentPenType === 0) {
-        sprite.lineStyle(2, 0xff0000, 1);
+        sprite.lineStyle(parseInt(pen_size), parseInt(pen_color), 1);
     } else if (currentPenType === 1) {
-        sprite.lineStyle(10, 0x1099bb, 1);
+        sprite.lineStyle(eraser_size, 0xffffff, 1);
     } else if (currentPenType === 2){ // Typing
         console.log("Typing");
         const mouseX = e.clientX - app.renderer.view.offsetLeft;
@@ -481,14 +543,13 @@ const onMouseUp = (e) => {
     if(pointCount > 0){
         //map to bezier curve
         curve = findBestFitCurve(currentPoints);
-        console.log(curve);
         var curve_sprite = new PIXI.Graphics();
         if (currentPenType === 0) {
-            curve_sprite.lineStyle(2, 0xff0000, 1);
+            curve_sprite.lineStyle(parseInt(pen_size), parseInt(pen_color), 1);
         } else if (currentPenType === 1) {
-            curve_sprite.lineStyle(10, 0x1099bb, 1);
+            curve_sprite.lineStyle(eraser_size, 0xffffff, 1);
         }
-        //curve_sprite.lineStyle(4, 0x000000, 0.5);
+
         curve_sprite.moveTo(currentPoints[0].x, currentPoints[0].y);
         curve_sprite.bezierCurveTo(curve[0].b, curve[1].b, curve[0].m, curve[1].m, currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
         stage.addChild(curve_sprite);
@@ -513,7 +574,13 @@ const onMouseUp = (e) => {
                 "|" +
                 currentPenType +
                 "|" +
-                currentZIndex
+                currentZIndex +
+                "|" +
+                pen_size +
+                "|" +
+                pen_color +
+                "|" +
+                eraser_size
         );
         //delete previous drawing
         currentSprites.forEach(element => {
@@ -527,42 +594,6 @@ const onMouseUp = (e) => {
 };
 
 
-//Bezier Curve Functions
-/*
-function cubicBezier(p0, p1, p2, p3, t) {
-    const cx = 3 * (p1.x - p0.x);
-    const cy = 3 * (p1.y - p0.y);
-    const bx = 3 * (p2.x - p1.x) - cx;
-    const by = 3 * (p2.y - p1.y) - cy;
-    const ax = p3.x - p0.x - cx - bx;
-    const ay = p3.y - p0.y - cy - by;
-    const x = ax * t * t * t + bx * t * t + cx * t + p0.x;
-    const y = ay * t * t * t + by * t * t + cy * t + p0.y;
-    return { x, y };
-  }
-  
-  function distance(point, curve) {
-    let minDist = Infinity;
-    for (let i = 0; i < 100; i++) { // divide the curve into 100 segments
-      const t = i / 100;
-      const curvePoint = cubicBezier(curve[0], curve[1], curve[2], curve[3], t);
-      const dist = Math.sqrt((point.x - curvePoint.x) ** 2 + (point.y - curvePoint.y) ** 2);
-      if (dist < minDist) {
-        minDist = dist;
-      }
-    }
-    return minDist;
-  }
-  
-  function totalDistance(points, curve) {
-    let totalDist = 0;
-    for (const point of points) {
-      const dist = distance(point, curve);
-      totalDist += dist;
-    }
-    return totalDist;
-  }
-  */
   function minimizeLoss(points){
     let P0 = points[0];
     let P3 = points[points.length - 1];
