@@ -54,6 +54,12 @@ body {
     margin: 2vh 2vw;
 }
 
+#sample-text{
+    margin: 3pt;
+    border: 1px solid black; /* add a border */
+    padding: 10px; /* add padding */
+}
+
 #toolbar {
     display: flex;
     justify-content: space-between;

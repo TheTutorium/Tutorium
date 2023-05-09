@@ -12,7 +12,18 @@ const MAX_MERR = 1;
 var pen_size = 2;
 var pen_color = "0x000000";
 var eraser_size = 10;
+var text_size = 14;
+var text_color = "0x000000";
 
+var writing_on_board = false;
+
+var textStyle = new PIXI.TextStyle({
+    fontFamily: "Arial",
+    fontSize: text_size,
+    fill: text_color,
+});
+
+var p_text = new PIXI.Text("Hello, world!", textStyle);
 
 const penSizeInput = document.getElementById("pen-size");
 
@@ -42,6 +53,45 @@ penColorSelect.addEventListener("change", () => {
   
 });
 
+// get references to the pen-size input and the "Sample Text" element
+const textSizeInput = document.getElementById("text-size");
+const sampleTextPointer = document.getElementById("sample-text");
+const textColorSelect = document.getElementById("text-color");
+
+// add an event listener to the pen-size input
+textSizeInput.addEventListener("input", () => {
+  // update the text of the "Sample Text" element
+  sampleTextPointer.textContent = "Sample Text";
+  
+  // update the font size of the "Sample Text" element based on the value of the pen-size input
+  const fontSize = `calc(${textSizeInput.value}px + (16px - ${textSizeInput.min}px) * (${textSizeInput.value} / (${textSizeInput.max} - ${textSizeInput.min})))`;
+  sampleTextPointer.style.fontSize = fontSize;
+
+    text_size = textSizeInput.value;
+    console.log(text_size);
+
+  textStyle = new PIXI.TextStyle({
+        fontFamily: "Arial",
+        fontSize: text_size,
+        fill: text_color,
+    });
+});
+
+textColorSelect.addEventListener("change", () => {
+    // get the selected option value
+    const fontColor = textColorSelect.value;
+    
+    // update the color of the "Sample Text" element
+    sampleTextPointer.style.color = fontColor;
+
+    text_color = fontColor;
+
+    textStyle = new PIXI.TextStyle({
+        fontFamily: "Arial",
+        fontSize: text_size,
+        fill: text_color,
+    });
+  });
 
 //Whiteboard Initialization
 const app = new PIXI.Application({
@@ -125,34 +175,71 @@ peer.on("connection", (conn) => {
             connectionInitiated = true;
         } else {
             let splittedMessage = data.split("|");
-            let initX = parseFloat(splittedMessage[0]);
-            let initY = parseFloat(splittedMessage[1]);
-            let control1x = parseFloat(splittedMessage[2]);
-            let control1y = parseFloat(splittedMessage[3]);
-            let control2x = parseFloat(splittedMessage[4]);
-            let control2y = parseFloat(splittedMessage[5]);
-            let finalX = parseFloat(splittedMessage[6]);
-            let finalY = parseFloat(splittedMessage[7]);
-            currentZIndex = parseFloat(splittedMessage[8]);
-            let tempPenSize = parseInt(splittedMessage[10]);
-            let tempPenColor = parseInt(splittedMessage[11]);
-            let tempEraserSize = parseInt(splittedMessage[12]);
 
-            console.log(tempPenSize);
-            console.log(tempPenColor);
-            console.log(data);
-            
-            sprite = new PIXI.Graphics();
-            if (parseFloat(splittedMessage[9]) == 0) {
-                sprite.lineStyle(tempPenSize, tempPenColor, 1);
-            } else if (parseFloat(splittedMessage[9]) == 1) {
+            let tempPenType = parseInt(splittedMessage[0]);
+            currentZIndex = parseInt(splittedMessage[1]);
+
+            if(tempPenType === 0){ // Pen
+                let initX = parseFloat(splittedMessage[2]);
+                let initY = parseFloat(splittedMessage[3]);
+                let control1x = parseFloat(splittedMessage[4]);
+                let control1y = parseFloat(splittedMessage[5]);
+                let control2x = parseFloat(splittedMessage[6]);
+                let control2y = parseFloat(splittedMessage[7]);
+                let finalX = parseFloat(splittedMessage[8]);
+                let finalY = parseFloat(splittedMessage[9]);
+                let tempPenSize = parseInt(splittedMessage[10]);
+                let tempPenColor = parseInt(splittedMessage[11]);
+
+                let tempSprite = new PIXI.Graphics();
+
+                tempSprite.lineStyle(tempPenSize, tempPenColor, 1);
+
+                tempSprite.zIndex = currentZIndex;
+                tempSprite.moveTo(initX, initY);
+                tempSprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
+    
+                stage.addChild(tempSprite);
+            }else if(tempPenType === 1){ // Eraser
+                let initX = parseFloat(splittedMessage[2]);
+                let initY = parseFloat(splittedMessage[3]);
+                let control1x = parseFloat(splittedMessage[4]);
+                let control1y = parseFloat(splittedMessage[5]);
+                let control2x = parseFloat(splittedMessage[6]);
+                let control2y = parseFloat(splittedMessage[7]);
+                let finalX = parseFloat(splittedMessage[8]);
+                let finalY = parseFloat(splittedMessage[9]);
+                let tempEraserSize = parseInt(splittedMessage[10]);
+
+                let tempSprite = new PIXI.Graphics();
+
                 sprite.lineStyle(tempEraserSize, 0xffffff, 1);
-            }
-            sprite.zIndex = currentZIndex;
-            sprite.moveTo(initX, initY);
-            sprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
 
-            stage.addChild(sprite);
+                tempSprite.zIndex = currentZIndex;
+                tempSprite.moveTo(initX, initY);
+                tempSprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
+    
+                stage.addChild(tempSprite);
+            }else if(tempPenType === 2){ // Typing
+                let tempTextSize = parseInt(splittedMessage[2]);
+                let tempTextColor = parseInt(splittedMessage[3]);
+                let tempText = splittedMessage[4];
+                let tempX = parseFloat(splittedMessage[5]);
+                let tempY = parseFloat(splittedMessage[6]);
+                
+                let tempStyle = new PIXI.TextStyle({
+                    fontFamily: "Arial",
+                    fontSize: tempTextSize,
+                    fill: tempTextColor,
+                });
+
+                let tempPText = PIXI.Text(tempText, tempStyle);
+                tempPText.zIndex = currentZIndex;
+                tempPText.moveTo(tempX, tempY);
+
+                stage.addChild(tempPText);
+            }
+
         }
     });
     conn.on("open", () => {
@@ -193,34 +280,72 @@ let connectToPeer = () => {
             connectionInitiated = true;
         } else {
             let splittedMessage = data.split("|");
-            let initX = parseFloat(splittedMessage[0]);
-            let initY = parseFloat(splittedMessage[1]);
-            let control1x = parseFloat(splittedMessage[2]);
-            let control1y = parseFloat(splittedMessage[3]);
-            let control2x = parseFloat(splittedMessage[4]);
-            let control2y = parseFloat(splittedMessage[5]);
-            let finalX = parseFloat(splittedMessage[6]);
-            let finalY = parseFloat(splittedMessage[7]);
-            currentZIndex = parseFloat(splittedMessage[8]);
-            let tempPenSize = parseInt(splittedMessage[10]);
-            let tempPenColor = parseInt(splittedMessage[11]);
-            let tempEraserSize = parseInt(splittedMessage[12]);
 
-            console.log(tempPenSize);
-            console.log(tempPenColor);
+            let tempPenType = parseInt(splittedMessage[0]);
+            currentZIndex = parseInt(splittedMessage[1]);
 
+            if(tempPenType === 0){ // Pen
+                let initX = parseFloat(splittedMessage[2]);
+                let initY = parseFloat(splittedMessage[3]);
+                let control1x = parseFloat(splittedMessage[4]);
+                let control1y = parseFloat(splittedMessage[5]);
+                let control2x = parseFloat(splittedMessage[6]);
+                let control2y = parseFloat(splittedMessage[7]);
+                let finalX = parseFloat(splittedMessage[8]);
+                let finalY = parseFloat(splittedMessage[9]);
+                let tempPenSize = parseInt(splittedMessage[10]);
+                let tempPenColor = parseInt(splittedMessage[11]);
 
-            sprite = new PIXI.Graphics();
-            if (parseFloat(splittedMessage[9]) == 0) {
-                sprite.lineStyle(tempPenSize, tempPenColor, 1);
-            } else if (parseFloat(splittedMessage[9]) == 1) {
+                let tempSprite = new PIXI.Graphics();
+
+                tempSprite.lineStyle(tempPenSize, tempPenColor, 1);
+
+                tempSprite.zIndex = currentZIndex;
+                tempSprite.moveTo(initX, initY);
+                tempSprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
+    
+                stage.addChild(tempSprite);
+            }else if(tempPenType === 1){ // Eraser
+                let initX = parseFloat(splittedMessage[2]);
+                let initY = parseFloat(splittedMessage[3]);
+                let control1x = parseFloat(splittedMessage[4]);
+                let control1y = parseFloat(splittedMessage[5]);
+                let control2x = parseFloat(splittedMessage[6]);
+                let control2y = parseFloat(splittedMessage[7]);
+                let finalX = parseFloat(splittedMessage[8]);
+                let finalY = parseFloat(splittedMessage[9]);
+                let tempEraserSize = parseInt(splittedMessage[10]);
+
+                let tempSprite = new PIXI.Graphics();
+
                 sprite.lineStyle(tempEraserSize, 0xffffff, 1);
-            }
-            sprite.zIndex = currentZIndex;
-            sprite.moveTo(initX, initY);
-            sprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
 
-            stage.addChild(sprite);
+                tempSprite.zIndex = currentZIndex;
+                tempSprite.moveTo(initX, initY);
+                tempSprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
+    
+                stage.addChild(tempSprite);
+            }else if(tempPenType === 2){ // Typing
+                let tempTextSize = parseInt(splittedMessage[2]);
+                let tempTextColor = parseInt(splittedMessage[3]);
+                let tempText = splittedMessage[4];
+                let tempX = parseFloat(splittedMessage[5]);
+                let tempY = parseFloat(splittedMessage[6]);
+                
+                let tempStyle = new PIXI.TextStyle({
+                    fontFamily: "Arial",
+                    fontSize: tempTextSize,
+                    fill: tempTextColor,
+                });
+
+                let tempPText = PIXI.Text(tempText, tempStyle);
+                tempPText.zIndex = currentZIndex;
+                tempPText.moveTo(tempX, tempY);
+
+                stage.addChild(tempPText);
+            }
+
+            
         
         }
     });
@@ -307,7 +432,7 @@ const changePenType = (type) => {
     const currButton = document.querySelector(`#tool-button-${type}`);
     currButton.classList.add('selected-button');
 
-    
+    writing_on_board = false;
 
     console.log(currentPenType);
     console.log(currentZIndex);
@@ -403,8 +528,13 @@ const onMouseMove = (e) => {
                 stage.addChild(curve_sprite);
                 //-------------------
                 //Send curve info
-                otherPeer.send(
-                    currentPoints[0].x +
+                if (currentPenType === 0) {
+                    otherPeer.send(
+                        currentPenType +
+                        "|" +
+                        currentZIndex +
+                        "|" +
+                        currentPoints[0].x +
                         "|" +
                         currentPoints[0].y +
                         "|" +
@@ -420,16 +550,36 @@ const onMouseMove = (e) => {
                         "|" +
                         currentPoints[currentPoints.length - 1].y +
                         "|" +
+                        pen_size +
+                        "|" +
+                        pen_color
+                    );
+                } else if (currentPenType === 1) {
+                    otherPeer.send(
                         currentPenType +
                         "|" +
                         currentZIndex +
                         "|" +
-                        pen_size +
+                        currentPoints[0].x +
                         "|" +
-                        pen_color +
-                        "|" + 
+                        currentPoints[0].y +
+                        "|" +
+                        curve[0].b +
+                        "|" +
+                        curve[1].b +
+                        "|" +
+                        curve[0].m +
+                        "|" +
+                        curve[1].m +
+                        "|" +
+                        currentPoints[currentPoints.length - 1].x +
+                        "|" +
+                        currentPoints[currentPoints.length - 1].y +
+                        "|" +
                         eraser_size
-                );
+                    );
+                }
+                
                 //delete previous drawing
                 currentSprites.forEach(element => {
                     stage.removeChild(element);
@@ -442,54 +592,6 @@ const onMouseMove = (e) => {
             
         }
         //*************************************** */
-
-/*
-        if(pointCount >= maxPointForBezierCurve){
-            //map to bezier curve
-            curve = findBestFitCurve(currentPoints);
-            console.log(curve);
-            var curve_sprite = new PIXI.Graphics();
-            if (currentPenType === 0) {
-                curve_sprite.lineStyle(2, 0xff0000, 1);
-            } else if (currentPenType === 1) {
-                curve_sprite.lineStyle(10, 0x1099bb, 1);
-            }
-            //curve_sprite.lineStyle(4, 0x000000, 0.5);
-            curve_sprite.moveTo(currentPoints[0].x, currentPoints[0].y);
-            curve_sprite.bezierCurveTo(curve[0].b, curve[1].b, curve[0].m, curve[1].m, currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
-            stage.addChild(curve_sprite);
-            //-------------------
-            //Send curve info
-            otherPeer.send(
-                currentPoints[0].x +
-                    "|" +
-                    currentPoints[0].y +
-                    "|" +
-                    curve[0].b +
-                    "|" +
-                    curve[1].b +
-                    "|" +
-                    curve[0].m +
-                    "|" +
-                    curve[1].m +
-                    "|" +
-                    currentPoints[currentPoints.length - 1].x +
-                    "|" +
-                    currentPoints[currentPoints.length - 1].y +
-                    "|" +
-                    currentPenType +
-                    "|" +
-                    currentZIndex
-            );
-            //delete previous drawing
-            currentSprites.forEach(element => {
-                stage.removeChild(element);
-            });
-
-            currentPoints = [initPointer];
-            currentSprites = [];
-            pointCount = 1;
-        }*/
 
         initPointer = mousePosRef;
         sprite.lineTo(mousePosRef.x, mousePosRef.y);
@@ -514,17 +616,13 @@ const onMouseDown = (e) => {
         console.log("Typing");
         const mouseX = e.clientX - app.renderer.view.offsetLeft;
         const mouseY = e.clientY - app.renderer.view.offsetTop;
-        const text = new PIXI.Text('Hello World', {
-            fontFamily: 'Arial',
-            fontSize: 36,
-            fill: 0x000000,
-            align: 'left'
-          });
-        text.zIndex = currentZIndex;
-        text.x = mouseX;
-        text.y = mouseY;
+        p_text = new PIXI.Text("", textStyle);
+        p_text.zIndex = currentZIndex;
+        p_text.x = mouseX;
+        p_text.y = mouseY;
         //text.moveTo(initPointer.x, initPointer.y);
-        stage.addChild(text);
+        stage.addChild(p_text);
+        writing_on_board = true;
     }
     //sprite.moveTo(initPointer.x, initPointer.y);
     //sprite.lineTo(mousePosRef.x, mousePosRef.y);
@@ -543,20 +641,28 @@ const onMouseUp = (e) => {
     if(pointCount > 0){
         //map to bezier curve
         curve = findBestFitCurve(currentPoints);
+        /*
+        console.log("berr" + (curve[0].bErr + curve[1].bErr));
+        console.log("merr" + (curve[0].mErr + curve[1].mErr));*/
         var curve_sprite = new PIXI.Graphics();
         if (currentPenType === 0) {
-            curve_sprite.lineStyle(parseInt(pen_size), parseInt(pen_color), 1);
+            curve_sprite.lineStyle(pen_size, pen_color, 1);
         } else if (currentPenType === 1) {
             curve_sprite.lineStyle(eraser_size, 0xffffff, 1);
         }
-
+        //curve_sprite.lineStyle(4, 0x000000, 0.5);
         curve_sprite.moveTo(currentPoints[0].x, currentPoints[0].y);
         curve_sprite.bezierCurveTo(curve[0].b, curve[1].b, curve[0].m, curve[1].m, currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
         stage.addChild(curve_sprite);
-        //------------------
+        //-------------------
         //Send curve info
-        otherPeer.send(
-            currentPoints[0].x +
+        if (currentPenType === 0) {
+            otherPeer.send(
+                currentPenType +
+                "|" +
+                currentZIndex +
+                "|" +
+                currentPoints[0].x +
                 "|" +
                 currentPoints[0].y +
                 "|" +
@@ -572,16 +678,36 @@ const onMouseUp = (e) => {
                 "|" +
                 currentPoints[currentPoints.length - 1].y +
                 "|" +
+                pen_size +
+                "|" +
+                pen_color
+            );
+        } else if (currentPenType === 1) {
+            otherPeer.send(
                 currentPenType +
                 "|" +
                 currentZIndex +
                 "|" +
-                pen_size +
+                currentPoints[0].x +
                 "|" +
-                pen_color +
+                currentPoints[0].y +
+                "|" +
+                curve[0].b +
+                "|" +
+                curve[1].b +
+                "|" +
+                curve[0].m +
+                "|" +
+                curve[1].m +
+                "|" +
+                currentPoints[currentPoints.length - 1].x +
+                "|" +
+                currentPoints[currentPoints.length - 1].y +
                 "|" +
                 eraser_size
-        );
+            );
+        }
+        
         //delete previous drawing
         currentSprites.forEach(element => {
             stage.removeChild(element);
@@ -592,6 +718,19 @@ const onMouseUp = (e) => {
         currentSprites = [];
     }
 };
+
+document.addEventListener("keydown", (event) => {
+    if(writing_on_board){
+        const alphanumericKey = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/.test(event.key);
+        if(event.key === "Enter"){
+            writing_on_board = false;
+        }
+        else if(alphanumericKey && event.key.length === 1){
+            p_text.text += event.key;
+        }
+    }
+    
+});
 
 
   function minimizeLoss(points){
@@ -621,7 +760,7 @@ const onMouseUp = (e) => {
   function findBestFitCurve(points) {
     const result = minimizeLoss(points);
     return result;
-  }
+}
 
   //End of Bezier Curve Functions
 

@@ -41,7 +41,7 @@ app.use(function (req, res, next) {
 });
 
 // listen for requests :)
-const listener = server.listen(PORT, () => {
+const listener = server.listen(PORT,"0.0.0.0", () => {
     console.log("Your app is listening on port " + listener.address().port);
 });
 
