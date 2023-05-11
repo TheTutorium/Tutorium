@@ -25,6 +25,8 @@ var textStyle = new PIXI.TextStyle({
 
 var p_text = new PIXI.Text("Hello, world!", textStyle);
 
+var last_mouse_button = 0;
+
 const penSizeInput = document.getElementById("pen-size");
 
 // listen for changes to the pen size input
@@ -53,6 +55,7 @@ penColorSelect.addEventListener("change", () => {
   
 });
 
+
 // get references to the pen-size input and the "Sample Text" element
 const textSizeInput = document.getElementById("text-size");
 const sampleTextPointer = document.getElementById("sample-text");
@@ -67,14 +70,27 @@ textSizeInput.addEventListener("input", () => {
   const fontSize = `calc(${textSizeInput.value}px + (16px - ${textSizeInput.min}px) * (${textSizeInput.value} / (${textSizeInput.max} - ${textSizeInput.min})))`;
   sampleTextPointer.style.fontSize = fontSize;
 
-    text_size = textSizeInput.value;
-    console.log(text_size);
+  if(writing_on_board){
+    otherPeer.send(
+        currentPenType +
+        "|" +
+        currentZIndex +
+        "|" +
+        text_size +
+        "|" +
+        text_color +
+        "|" +
+        p_text.text +
+        "|" +
+        p_text.x +
+        "|" +
+        p_text.y
+    );
+    writing_on_board = false;
+  }
 
-  textStyle = new PIXI.TextStyle({
-        fontFamily: "Arial",
-        fontSize: text_size,
-        fill: text_color,
-    });
+    text_size = textSizeInput.value;
+
 });
 
 textColorSelect.addEventListener("change", () => {
@@ -84,13 +100,27 @@ textColorSelect.addEventListener("change", () => {
     // update the color of the "Sample Text" element
     sampleTextPointer.style.color = fontColor;
 
+    if(writing_on_board){
+        otherPeer.send(
+            currentPenType +
+            "|" +
+            currentZIndex +
+            "|" +
+            text_size +
+            "|" +
+            text_color +
+            "|" +
+            p_text.text +
+            "|" +
+            p_text.x +
+            "|" +
+            p_text.y
+        );
+        writing_on_board = false;
+      }
+
     text_color = fontColor;
 
-    textStyle = new PIXI.TextStyle({
-        fontFamily: "Arial",
-        fontSize: text_size,
-        fill: text_color,
-    });
   });
 
 //Whiteboard Initialization
@@ -101,17 +131,42 @@ const app = new PIXI.Application({
     height: window.innerHeight * 0.5,
 });
 
+/*
 window.addEventListener("resize", () => {
     app.resize(window.width * 2, window.height * 2);
-});
+});*/
 
 const stage = new PIXI.Container();
+stage.scale.set(1);
 
 app.stage.addChild(stage);
 
 const container = document.querySelector(".white-board");
 
 container.appendChild(app.view);
+
+// Get the canvas element
+const canvas = app.view;
+
+// Add a 'wheel' event listener to the canvas
+canvas.addEventListener('wheel', onCanvasScroll);
+
+const SCALE_CONST = 0.1;
+
+var canvas_scale = 1.0;
+var canvas_translation = {x: 0.0, y: 0.0};
+
+// Define the 'onCanvasScroll' function
+function onCanvasScroll(event) {
+  // Get the scroll direction
+  const delta = Math.sign(event.deltaY) * SCALE_CONST;
+
+  // Do something with the scroll direction
+  console.log(stage.scale);
+    stage.scale.set(stage.scale.x * (1 - delta));
+    canvas_scale = stage.scale.x;
+}
+
 
 /*const whiteboard = new PIXI.Graphics();
 whiteboard.beginFill(0xffffff);
@@ -174,12 +229,14 @@ peer.on("connection", (conn) => {
         if (!connectionInitiated) {
             connectionInitiated = true;
         } else {
+
+            console.log(data);
             let splittedMessage = data.split("|");
 
             let tempPenType = parseInt(splittedMessage[0]);
             currentZIndex = parseInt(splittedMessage[1]);
 
-            if(tempPenType === 0){ // Pen
+            if(tempPenType == 0){ // Pen
                 let initX = parseFloat(splittedMessage[2]);
                 let initY = parseFloat(splittedMessage[3]);
                 let control1x = parseFloat(splittedMessage[4]);
@@ -200,7 +257,7 @@ peer.on("connection", (conn) => {
                 tempSprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
     
                 stage.addChild(tempSprite);
-            }else if(tempPenType === 1){ // Eraser
+            }else if(tempPenType == 1){ // Eraser
                 let initX = parseFloat(splittedMessage[2]);
                 let initY = parseFloat(splittedMessage[3]);
                 let control1x = parseFloat(splittedMessage[4]);
@@ -213,14 +270,14 @@ peer.on("connection", (conn) => {
 
                 let tempSprite = new PIXI.Graphics();
 
-                sprite.lineStyle(tempEraserSize, 0xffffff, 1);
+                tempSprite.lineStyle(tempEraserSize, 0xffffff, 1);
 
                 tempSprite.zIndex = currentZIndex;
                 tempSprite.moveTo(initX, initY);
                 tempSprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
     
                 stage.addChild(tempSprite);
-            }else if(tempPenType === 2){ // Typing
+            }else if(tempPenType == 2){ // Typing
                 let tempTextSize = parseInt(splittedMessage[2]);
                 let tempTextColor = parseInt(splittedMessage[3]);
                 let tempText = splittedMessage[4];
@@ -233,9 +290,10 @@ peer.on("connection", (conn) => {
                     fill: tempTextColor,
                 });
 
-                let tempPText = PIXI.Text(tempText, tempStyle);
+                let tempPText = new PIXI.Text(tempText, tempStyle);
                 tempPText.zIndex = currentZIndex;
-                tempPText.moveTo(tempX, tempY);
+                tempPText.x = tempX;
+                tempPText.y = tempY;
 
                 stage.addChild(tempPText);
             }
@@ -279,12 +337,13 @@ let connectToPeer = () => {
         if (!connectionInitiated) {
             connectionInitiated = true;
         } else {
+            console.log(data);
             let splittedMessage = data.split("|");
 
             let tempPenType = parseInt(splittedMessage[0]);
             currentZIndex = parseInt(splittedMessage[1]);
 
-            if(tempPenType === 0){ // Pen
+            if(tempPenType == 0){ // Pen
                 let initX = parseFloat(splittedMessage[2]);
                 let initY = parseFloat(splittedMessage[3]);
                 let control1x = parseFloat(splittedMessage[4]);
@@ -305,7 +364,7 @@ let connectToPeer = () => {
                 tempSprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
     
                 stage.addChild(tempSprite);
-            }else if(tempPenType === 1){ // Eraser
+            }else if(tempPenType == 1){ // Eraser
                 let initX = parseFloat(splittedMessage[2]);
                 let initY = parseFloat(splittedMessage[3]);
                 let control1x = parseFloat(splittedMessage[4]);
@@ -318,14 +377,14 @@ let connectToPeer = () => {
 
                 let tempSprite = new PIXI.Graphics();
 
-                sprite.lineStyle(tempEraserSize, 0xffffff, 1);
+                tempSprite.lineStyle(tempEraserSize, 0xffffff, 1);
 
                 tempSprite.zIndex = currentZIndex;
                 tempSprite.moveTo(initX, initY);
                 tempSprite.bezierCurveTo(control1x, control1y, control2x, control2y, finalX, finalY);
     
                 stage.addChild(tempSprite);
-            }else if(tempPenType === 2){ // Typing
+            }else if(tempPenType == 2){ // Typing
                 let tempTextSize = parseInt(splittedMessage[2]);
                 let tempTextColor = parseInt(splittedMessage[3]);
                 let tempText = splittedMessage[4];
@@ -338,9 +397,10 @@ let connectToPeer = () => {
                     fill: tempTextColor,
                 });
 
-                let tempPText = PIXI.Text(tempText, tempStyle);
+                let tempPText = new PIXI.Text(tempText, tempStyle);
                 tempPText.zIndex = currentZIndex;
-                tempPText.moveTo(tempX, tempY);
+                tempPText.x = tempX;
+                tempPText.y = tempY;
 
                 stage.addChild(tempPText);
             }
@@ -350,16 +410,6 @@ let connectToPeer = () => {
         }
     });
 
-    /*navigator.mediaDevices
-        .getUserMedia({
-            video: {
-                mediaSource: "screen",
-            },
-        })
-        .then((stream) => {
-            // Use the stream in your PeerJS connection
-            conn.addStream(stream);
-        });*/
     navigator.mediaDevices
         .getUserMedia({ video: true, audio: false })
         .then((stream) => {
@@ -464,10 +514,43 @@ const onMouseMove = (e) => {
     // clearSpriteRef(annoRef)
     if (initPointer == null) return;
 
-
-    /// Drawing
     const curMousePosRef = getMousePos(e);
     curDistance = Math.sqrt((curMousePosRef.x - mousePosRef.x) * (curMousePosRef.x - mousePosRef.x) + (curMousePosRef.y - mousePosRef.y) * (curMousePosRef.y - mousePosRef.y));
+
+    /*if(last_mouse_button == 1){
+        const canvasCenter = { x: canvas.width / 2, y: canvas.height / 2 };
+        const angleDelta = curMousePosRef.x - initPointer.x;
+        const rotationAngle = angleDelta * 0.01;
+
+        //stage.pivot.set(canvasCenter.x, canvasCenter.y);
+        stage.rotation += rotationAngle;
+
+        initPointer = curMousePosRef;
+
+        return;
+    }*/
+
+    if(last_mouse_button == 2){
+
+        let translationOffset = { x: 0, y: 0 };
+        translationOffset.x += curMousePosRef.x - initPointer.x;
+        translationOffset.y += curMousePosRef.y - initPointer.y;
+
+        
+
+        stage.position.set(stage.position.x + translationOffset.x, stage.position.y + translationOffset.y);
+
+        canvas_translation.x = stage.position.x;
+        canvas_translation.y = stage.position.y;
+
+        initPointer = curMousePosRef;
+
+        return;
+    }
+
+
+    /// Drawing
+    
 
     while (putDistance <= curDistance) {
         sprite = new PIXI.Graphics();
@@ -525,6 +608,9 @@ const onMouseMove = (e) => {
             if(curve[0].bErr + curve[1].bErr > MAX_BERR || curve[0].mErr + curve[1].mErr > MAX_MERR){
                 curve_sprite.moveTo(currentPoints[0].x, currentPoints[0].y);
                 curve_sprite.bezierCurveTo(curve[0].b, curve[1].b, curve[0].m, curve[1].m, currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
+
+                curve_sprite.moveTo(curve_sprite.x + canvas_translation.x, curve_sprite.y + canvas_translation.y);
+
                 stage.addChild(curve_sprite);
                 //-------------------
                 //Send curve info
@@ -595,6 +681,9 @@ const onMouseMove = (e) => {
 
         initPointer = mousePosRef;
         sprite.lineTo(mousePosRef.x, mousePosRef.y);
+
+        sprite.moveTo(sprite.x + canvas_translation.x, sprite.y + canvas_translation.y);
+
         stage.addChild(sprite);
         currentSprites.push(sprite);
 
@@ -603,9 +692,48 @@ const onMouseMove = (e) => {
     /// Drawing End
 };
 
+container.oncontextmenu = function(e) { e.preventDefault(); e.stopPropagation(); }
+
+
+
 const onMouseDown = (e) => {
     mousePosRef = getMousePos(e);
     initPointer = mousePosRef;
+    isMouseButtonDown = true;
+
+    if (e.button === 1) {
+        e.preventDefault();
+        e.stopPropagation();
+        last_mouse_button = 1;
+        return;
+    } 
+
+    if (e.button === 2){
+        console.log("2");
+        last_mouse_button = 2;
+        return;
+    }
+
+    last_mouse_button = 0;
+
+    if(currentPenType != 2 && writing_on_board){
+        writing_on_board = false;
+        otherPeer.send(
+            currentPenType +
+            "|" +
+            currentZIndex +
+            "|" +
+            text_size +
+            "|" +
+            text_color +
+            "|" +
+            p_text.text +
+            "|" +
+            p_text.x +
+            "|" +
+            p_text.y
+        );
+    }
 
     sprite = new PIXI.Graphics();
     if (currentPenType === 0) {
@@ -613,14 +741,40 @@ const onMouseDown = (e) => {
     } else if (currentPenType === 1) {
         sprite.lineStyle(eraser_size, 0xffffff, 1);
     } else if (currentPenType === 2){ // Typing
+        if(writing_on_board == true){
+            otherPeer.send(
+                currentPenType +
+                "|" +
+                currentZIndex +
+                "|" +
+                text_size +
+                "|" +
+                text_color +
+                "|" +
+                p_text.text +
+                "|" +
+                p_text.x +
+                "|" +
+                p_text.y
+            );
+        }
         console.log("Typing");
         const mouseX = e.clientX - app.renderer.view.offsetLeft;
         const mouseY = e.clientY - app.renderer.view.offsetTop;
+        console.log(text_size + " " + text_size.type);
+        textStyle = new PIXI.TextStyle({
+            fontFamily: "Arial",
+            fontSize: parseInt(text_size),
+            fill: text_color,
+        });
         p_text = new PIXI.Text("", textStyle);
         p_text.zIndex = currentZIndex;
         p_text.x = mouseX;
         p_text.y = mouseY;
         //text.moveTo(initPointer.x, initPointer.y);
+
+        //p_text.moveTo(p_text.x + canvas_translation.x, p_text.y + canvas_translation.y);
+
         stage.addChild(p_text);
         writing_on_board = true;
     }
@@ -629,7 +783,7 @@ const onMouseDown = (e) => {
 
     //stage.addChild(sprite);
 
-    isMouseButtonDown = true;
+    
 
     //console.log(mousePosRef);
 };
@@ -653,6 +807,9 @@ const onMouseUp = (e) => {
         //curve_sprite.lineStyle(4, 0x000000, 0.5);
         curve_sprite.moveTo(currentPoints[0].x, currentPoints[0].y);
         curve_sprite.bezierCurveTo(curve[0].b, curve[1].b, curve[0].m, curve[1].m, currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
+
+        curve_sprite.moveTo(curve_sprite.x + canvas_translation.x, curve_sprite.y + canvas_translation.y);
+
         stage.addChild(curve_sprite);
         //-------------------
         //Send curve info
@@ -718,11 +875,29 @@ const onMouseUp = (e) => {
         currentSprites = [];
     }
 };
-
+     
 document.addEventListener("keydown", (event) => {
     if(writing_on_board){
         const alphanumericKey = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/.test(event.key);
-        if(event.key === "Enter"){
+        if(event.key.localeCompare("Enter") === 0){
+            //Send Text
+            otherPeer.send(
+                currentPenType +
+                "|" +
+                currentZIndex +
+                "|" +
+                text_size +
+                "|" +
+                text_color +
+                "|" +
+                p_text.text +
+                "|" +
+                p_text.x +
+                "|" +
+                p_text.y
+            );
+
+
             writing_on_board = false;
         }
         else if(alphanumericKey && event.key.length === 1){
