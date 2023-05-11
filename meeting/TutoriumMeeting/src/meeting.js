@@ -156,15 +156,58 @@ const SCALE_CONST = 0.1;
 var canvas_scale = 1.0;
 var canvas_translation = {x: 0.0, y: 0.0};
 
+
+function transformPoint(x,y){
+
+    var newX = (x + canvas_translation.x) / canvas_scale;
+    var newY = (y + canvas_translation.y) / canvas_scale;
+
+
+    return {x: newX, y: newY};
+}
+
+const fileInput = document.getElementById('file-input');
+
+var have_file = false;
+var current_image;
+var image_texture;
+
+fileInput.addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  const reader = new FileReader();
+  reader.onload = () => {
+    current_image = reader.result;
+    //console.log(current_image);
+    /*image_texture = PIXI.Texture.from(reader.result);
+    
+    const sprite = new PIXI.Sprite(texture);
+    stage.addChild(sprite);*/
+    have_file = true;
+  };
+  reader.readAsDataURL(file);
+});
+
 // Define the 'onCanvasScroll' function
 function onCanvasScroll(event) {
-  // Get the scroll direction
-  const delta = Math.sign(event.deltaY) * SCALE_CONST;
+    // Get the scroll direction
+    const delta = Math.sign(event.deltaY) * SCALE_CONST;
 
-  // Do something with the scroll direction
-  console.log(stage.scale);
+    // Do something with the scroll direction
+    var middlePoint = transformPoint(0, 0);
+    console.log(middlePoint);
+    console.log(canvas_scale);
+
     stage.scale.set(stage.scale.x * (1 - delta));
     canvas_scale = stage.scale.x;
+
+    /*var newMiddlePoint = transformPoint(0,0);
+
+    var temp_dist = {x: middlePoint.x - newMiddlePoint.x, y: middlePoint.y - newMiddlePoint.y};
+
+    stage.position.set(stage.position.x + (temp_dist.x / canvas_scale), stage.position.y + (temp_dist.y / canvas_scale));
+
+    canvas_translation = {x: canvas_translation.x + (temp_dist.x / canvas_scale), y: canvas_translation.y + (temp_dist.y / canvas_scale)};*/
+
 }
 
 
@@ -296,6 +339,18 @@ peer.on("connection", (conn) => {
                 tempPText.y = tempY;
 
                 stage.addChild(tempPText);
+            }else if(tempPenType == 3){
+                let temp_image = splittedMessage[2];
+                let tempX = parseFloat(splittedMessage[3]);
+                let tempY = parseFloat(splittedMessage[4]);
+
+                const image_texture = PIXI.Texture.from(temp_image);
+                const sprite = new PIXI.Sprite(image_texture);
+
+                sprite.x = tempX;
+                sprite.y = tempY;
+
+                stage.addChild(sprite);
             }
 
         }
@@ -540,8 +595,10 @@ const onMouseMove = (e) => {
 
         stage.position.set(stage.position.x + translationOffset.x, stage.position.y + translationOffset.y);
 
-        canvas_translation.x = stage.position.x;
-        canvas_translation.y = stage.position.y;
+
+        console.log(canvas_translation);
+        canvas_translation.x = -stage.position.x;
+        canvas_translation.y = -stage.position.y;
 
         initPointer = curMousePosRef;
 
@@ -560,7 +617,10 @@ const onMouseMove = (e) => {
         } else if (currentPenType === 1) {
             sprite.lineStyle(eraser_size, 0xffffff, 1);
         }
-        sprite.moveTo(initPointer.x, initPointer.y);
+        
+        var temp_translated_pos = transformPoint(initPointer.x, initPointer.y);
+
+        sprite.moveTo(temp_translated_pos.x, temp_translated_pos.y);
         sprite.zIndex = currentZIndex;
 
         //Translate Towards a point
@@ -606,10 +666,15 @@ const onMouseMove = (e) => {
             //curve_sprite.lineStyle(4, 0x000000, 0.5);
 
             if(curve[0].bErr + curve[1].bErr > MAX_BERR || curve[0].mErr + curve[1].mErr > MAX_MERR){
-                curve_sprite.moveTo(currentPoints[0].x, currentPoints[0].y);
-                curve_sprite.bezierCurveTo(curve[0].b, curve[1].b, curve[0].m, curve[1].m, currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
 
-                curve_sprite.moveTo(curve_sprite.x + canvas_translation.x, curve_sprite.y + canvas_translation.y);
+                const control0 = transformPoint(currentPoints[0].x, currentPoints[0].y);
+                const control1 = transformPoint(curve[0].b, curve[1].b);
+                const control2 = transformPoint(curve[0].m, curve[1].m);
+                const control3 = transformPoint(currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
+
+
+                curve_sprite.moveTo(control0.x, control0.y);
+                curve_sprite.bezierCurveTo(control1.x, control1.y, control2.x, control2.y, control3.x,  control3.y);
 
                 stage.addChild(curve_sprite);
                 //-------------------
@@ -620,21 +685,21 @@ const onMouseMove = (e) => {
                         "|" +
                         currentZIndex +
                         "|" +
-                        currentPoints[0].x +
+                        control0.x +
                         "|" +
-                        currentPoints[0].y +
+                        control0.y +
                         "|" +
-                        curve[0].b +
+                        control1.x +
                         "|" +
-                        curve[1].b +
+                        control1.y +
                         "|" +
-                        curve[0].m +
+                        control2.x +
                         "|" +
-                        curve[1].m +
+                        control2.y +
                         "|" +
-                        currentPoints[currentPoints.length - 1].x +
+                        control3.x +
                         "|" +
-                        currentPoints[currentPoints.length - 1].y +
+                        control3.y +
                         "|" +
                         pen_size +
                         "|" +
@@ -646,21 +711,21 @@ const onMouseMove = (e) => {
                         "|" +
                         currentZIndex +
                         "|" +
-                        currentPoints[0].x +
+                        control0.x +
                         "|" +
-                        currentPoints[0].y +
+                        control0.y +
                         "|" +
-                        curve[0].b +
+                        control1.x +
                         "|" +
-                        curve[1].b +
+                        control1.y +
                         "|" +
-                        curve[0].m +
+                        control2.x +
                         "|" +
-                        curve[1].m +
+                        control2.y +
                         "|" +
-                        currentPoints[currentPoints.length - 1].x +
+                        control3.x +
                         "|" +
-                        currentPoints[currentPoints.length - 1].y +
+                        control3.y +
                         "|" +
                         eraser_size
                     );
@@ -680,9 +745,10 @@ const onMouseMove = (e) => {
         //*************************************** */
 
         initPointer = mousePosRef;
-        sprite.lineTo(mousePosRef.x, mousePosRef.y);
 
-        sprite.moveTo(sprite.x + canvas_translation.x, sprite.y + canvas_translation.y);
+        var temp_mousePosRef = transformPoint(mousePosRef.x, mousePosRef.y);
+
+        sprite.lineTo(temp_mousePosRef.x, temp_mousePosRef.y);
 
         stage.addChild(sprite);
         currentSprites.push(sprite);
@@ -713,6 +779,7 @@ const onMouseDown = (e) => {
         last_mouse_button = 2;
         return;
     }
+
 
     last_mouse_button = 0;
 
@@ -769,14 +836,48 @@ const onMouseDown = (e) => {
         });
         p_text = new PIXI.Text("", textStyle);
         p_text.zIndex = currentZIndex;
-        p_text.x = mouseX;
-        p_text.y = mouseY;
+
+        var space_pos = transformPoint(mouseX, mouseY);
+
+        p_text.x = space_pos.x;
+        p_text.y = space_pos.y;
         //text.moveTo(initPointer.x, initPointer.y);
 
         //p_text.moveTo(p_text.x + canvas_translation.x, p_text.y + canvas_translation.y);
 
         stage.addChild(p_text);
         writing_on_board = true;
+    } else if(currentPenType === 3){
+        if(have_file){
+
+            have_file = false;
+
+            image_texture = PIXI.Texture.from(current_image);
+    
+            const sprite = new PIXI.Sprite(image_texture);
+
+            const relativePos = transformPoint(mousePosRef.x, mousePosRef.y);
+
+            sprite.x = relativePos.x;
+            sprite.y = relativePos.y;
+            
+            stage.addChild(sprite);
+
+
+            otherPeer.send(
+                currentPenType +
+                "|" +
+                currentZIndex +
+                "|" + 
+                current_image +
+                "|" +
+                relativePos.x +
+                "|" +
+                relativePos.y
+            );
+
+
+        }
     }
     //sprite.moveTo(initPointer.x, initPointer.y);
     //sprite.lineTo(mousePosRef.x, mousePosRef.y);
@@ -805,10 +906,14 @@ const onMouseUp = (e) => {
             curve_sprite.lineStyle(eraser_size, 0xffffff, 1);
         }
         //curve_sprite.lineStyle(4, 0x000000, 0.5);
-        curve_sprite.moveTo(currentPoints[0].x, currentPoints[0].y);
-        curve_sprite.bezierCurveTo(curve[0].b, curve[1].b, curve[0].m, curve[1].m, currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
 
-        curve_sprite.moveTo(curve_sprite.x + canvas_translation.x, curve_sprite.y + canvas_translation.y);
+        const control0 = transformPoint(currentPoints[0].x, currentPoints[0].y);
+        const control1 = transformPoint(curve[0].b, curve[1].b);
+        const control2 = transformPoint(curve[0].m, curve[1].m);
+        const control3 = transformPoint(currentPoints[currentPoints.length - 1].x,  currentPoints[currentPoints.length - 1].y);
+
+        curve_sprite.moveTo(control0.x, control0.y);
+        curve_sprite.bezierCurveTo(control1.x, control1.y, control2.x, control2.y, control3.x,  control3.y);
 
         stage.addChild(curve_sprite);
         //-------------------
@@ -819,21 +924,21 @@ const onMouseUp = (e) => {
                 "|" +
                 currentZIndex +
                 "|" +
-                currentPoints[0].x +
+                control0.x +
                 "|" +
-                currentPoints[0].y +
+                control0.y +
                 "|" +
-                curve[0].b +
+                control1.x +
                 "|" +
-                curve[1].b +
+                control1.y +
                 "|" +
-                curve[0].m +
+                control2.x +
                 "|" +
-                curve[1].m +
+                control2.y +
                 "|" +
-                currentPoints[currentPoints.length - 1].x +
+                control3.x +
                 "|" +
-                currentPoints[currentPoints.length - 1].y +
+                control3.y +
                 "|" +
                 pen_size +
                 "|" +
@@ -845,21 +950,21 @@ const onMouseUp = (e) => {
                 "|" +
                 currentZIndex +
                 "|" +
-                currentPoints[0].x +
+                control0.x +
                 "|" +
-                currentPoints[0].y +
+                control0.y +
                 "|" +
-                curve[0].b +
+                control1.x +
                 "|" +
-                curve[1].b +
+                control1.y +
                 "|" +
-                curve[0].m +
+                control2.x +
                 "|" +
-                curve[1].m +
+                control2.y +
                 "|" +
-                currentPoints[currentPoints.length - 1].x +
+                control3.x +
                 "|" +
-                currentPoints[currentPoints.length - 1].y +
+                control3.y +
                 "|" +
                 eraser_size
             );
