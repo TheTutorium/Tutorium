@@ -16,6 +16,8 @@
     <script src="/scripts/peerjs/dist/peerjs.js"></script>
     <script src="https://unpkg.com/optimization-js@latest/dist/optimization.js"></script>
     <script src="/scripts/least-squares/lib/least-squares.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/meeting.js" type="module"></script>
 
   </head>
@@ -40,18 +42,31 @@
         </li>
       </ul>
     </nav>
+    <div id="interactive-selection">
+      <button id="interactive-button-0" onclick="changeInteractiveTool(0)" class="interactive-button selected-interactive-button">
+        Whiteboard
+      </button>
+      <button id="interactive-button-1" onclick="changeInteractiveTool(1)" class="interactive-button">
+        PDF viewer
+      </button>
+    </div>
     <div id="main-container">
       <div id="video-container">
         <video class="remote-video" autoplay></video>
+    </div>
+    <div id="interactives">
+      <div id="interactive-0" class="white-board">
       </div>
-    <div class="white-board">
-
+      <div  id="interactive-1" class="hidden">
+        <iframe id="pdf-iframe" width="100%" height="500px"></iframe>
+        <input type="file" id="pdf-input">
+      </div>
     </div>
     <div id="video-container">
       <video id="local-video" autoplay></video>
     </div>
   </div>
-    <div id="tools">
+    <div id="tools-0" class="tools">
     <button id="tool-button-0" onclick="changePenType(0)" class="tool selected-button">
       Pen
     </button>
@@ -66,6 +81,13 @@
     </button>
     <button id="share-screen-button" class="tool hidden">
       Share Screen
+    </button>
+
+  </div>
+
+  <div id="tools-1" class="tools hidden">
+    <button id="pdf-tool-button-0" onclick="shotImage()" class="pdf-tool">
+      Take Picture
     </button>
 
   </div>

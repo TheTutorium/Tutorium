@@ -28,6 +28,11 @@ body {
         color: white;
 }
 
+.selected-interactive-button{
+    background-color: darkblue;
+        color: white;
+}
+
 .tool-additionals{
     display: flex;
     align-items: center;
@@ -44,14 +49,23 @@ body {
     justify-content: space-around;
 }
 
-#tools {
+.tools {
     display: flex;
     justify-content: center;
     margin: 3vh 3vw;
 }
 
+#interactive-selection{
+    display: flex;
+    justify-content: center;
+}
+
 .tool {
     margin: 2vh 2vw;
+}
+
+.interactive-button {
+    margin: 1vh 1vw;
 }
 
 #sample-text{

@@ -17,6 +17,8 @@ var text_color = "0x000000";
 
 var writing_on_board = false;
 
+var canvasElements;
+
 var textStyle = new PIXI.TextStyle({
     fontFamily: "Arial",
     fontSize: text_size,
@@ -177,7 +179,7 @@ fileInput.addEventListener('change', (event) => {
   const reader = new FileReader();
   reader.onload = () => {
     current_image = reader.result;
-    //console.log(current_image);
+    console.log(current_image);
     /*image_texture = PIXI.Texture.from(reader.result);
     
     const sprite = new PIXI.Sprite(texture);
@@ -351,6 +353,42 @@ peer.on("connection", (conn) => {
                 sprite.y = tempY;
 
                 stage.addChild(sprite);
+            }else if(tempPenType == -1){
+                let temp_pdf = splittedMessage[1];
+
+                const arr = temp_pdf.split(",").map(Number);
+                const uint8arr = new Uint8Array(arr);
+
+                console.log(uint8arr);
+                
+
+                pdfjsLib.getDocument(uint8arr).promise.then(function(pdf) {
+                    var pages = Array.from(Array(pdf.numPages).keys());
+                    return Promise.all(pages.map(function(num) {
+                    return pdf.getPage(num + 1);
+                    }));
+                }).then(function(pages) {
+                    
+                    var iframe = document.getElementById('pdf-iframe');
+                    canvasElements = pages.map(function(page) {
+                        var canvas = document.createElement('canvas');
+                        console.log(iframe);
+                        var scale = Math.min(iframe.clientWidth / page.getViewport({scale: 1}).width, iframe.clientHeight / page.getViewport({scale: 1}).height);
+                        var viewport = page.getViewport({scale: scale * 1.3});
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        page.render({canvasContext: canvas.getContext('2d'), viewport: viewport}).promise.then(function() {});
+                        return canvas;
+                    });
+                    
+                    var doc = iframe.contentWindow.document;
+                    doc.open();
+                    doc.write("<html><body></body></html>");
+                    canvasElements.forEach(function(canvas) {
+                    doc.body.appendChild(canvas);
+                    });
+                    doc.close();
+                });
             }
 
         }
@@ -458,6 +496,54 @@ let connectToPeer = () => {
                 tempPText.y = tempY;
 
                 stage.addChild(tempPText);
+            }else if(tempPenType == 3){
+                let temp_image = splittedMessage[2];
+                let tempX = parseFloat(splittedMessage[3]);
+                let tempY = parseFloat(splittedMessage[4]);
+
+                const image_texture = PIXI.Texture.from(temp_image);
+                const sprite = new PIXI.Sprite(image_texture);
+
+                sprite.x = tempX;
+                sprite.y = tempY;
+
+                stage.addChild(sprite);
+            }else if(tempPenType == -1){
+                let temp_pdf = splittedMessage[1];
+
+                const arr = temp_pdf.split(",").map(Number);
+                const uint8arr = new Uint8Array(arr);
+
+                console.log(uint8arr);
+                
+
+                pdfjsLib.getDocument(uint8arr).promise.then(function(pdf) {
+                    var pages = Array.from(Array(pdf.numPages).keys());
+                    return Promise.all(pages.map(function(num) {
+                    return pdf.getPage(num + 1);
+                    }));
+                }).then(function(pages) {
+                    
+                    var iframe = document.getElementById('pdf-iframe');
+                    canvasElements = pages.map(function(page) {
+                        var canvas = document.createElement('canvas');
+                        console.log(iframe);
+                        var scale = Math.min(iframe.clientWidth / page.getViewport({scale: 1}).width, iframe.clientHeight / page.getViewport({scale: 1}).height);
+                        var viewport = page.getViewport({scale: scale * 1.3});
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        page.render({canvasContext: canvas.getContext('2d'), viewport: viewport}).promise.then(function() {});
+                        return canvas;
+                    });
+                    
+                    var doc = iframe.contentWindow.document;
+                    doc.open();
+                    doc.write("<html><body></body></html>");
+                    canvasElements.forEach(function(canvas) {
+                    doc.body.appendChild(canvas);
+                    });
+                    doc.close();
+                });
             }
 
             
@@ -512,6 +598,38 @@ navigator.mediaDevices.getUserMedia(
         console.error(err);
     }
 );*/
+
+let currentInteractiveTool = 0;
+
+const changeInteractiveTool = (tool) => {
+    
+    const prevToolButtons = document.querySelector(`#tools-${currentInteractiveTool}`);
+    prevToolButtons.classList.add('hidden');
+
+    const currToolButtons = document.querySelector(`#tools-${tool}`);
+    currToolButtons.classList.remove('hidden');
+
+    const prevTools = document.querySelector(`#interactive-${currentInteractiveTool}`);
+    prevTools.classList.add('hidden');
+
+    const currTools = document.querySelector(`#interactive-${tool}`);
+    currTools.classList.remove('hidden');
+    
+    currentInteractiveTool = tool;
+
+    // Get the previously selected button and remove its selected status
+    const prevButton = document.querySelector('.selected-interactive-button');
+    prevButton.classList.remove('selected-interactive-button');
+
+    // Get the currently selected button and add its selected status
+    const currButton = document.querySelector(`#interactive-button-${tool}`);
+    currButton.classList.add('selected-interactive-button');
+
+    writing_on_board = false;
+
+};
+
+window.changeInteractiveTool = changeInteractiveTool;
 
 // Whiteboard Part
 
@@ -984,6 +1102,7 @@ const onMouseUp = (e) => {
 document.addEventListener("keydown", (event) => {
     if(writing_on_board){
         const alphanumericKey = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/.test(event.key);
+        console.log(event.key);
         if(event.key.localeCompare("Enter") === 0){
             //Send Text
             otherPeer.send(
@@ -1007,6 +1126,8 @@ document.addEventListener("keydown", (event) => {
         }
         else if(alphanumericKey && event.key.length === 1){
             p_text.text += event.key;
+        }else if(event.key.localeCompare(" ") === 0){
+            p_text.text += " ";
         }
     }
     
@@ -1050,3 +1171,98 @@ container.addEventListener("mousedown", onMouseDown, 0);
 
 container.addEventListener("mouseup", onMouseUp, 0);
 
+
+//PDF Share
+
+/*IMPORTANT NOTES!!!!!!!!!!!!!!!!!!!
+    Make pdfs fit to page
+    Solve not rendering text problem
+*/
+
+document.getElementById('pdf-input').addEventListener('change', function() {
+    var file = this.files[0];
+    var fileReader = new FileReader();
+    
+    fileReader.onload = function() {
+        //Send Other Peer
+        console.log(this.result);
+
+      var typedarray = new Uint8Array(this.result);
+      otherPeer.send(
+        "-1" +
+        "|" +
+        typedarray
+    );
+       
+
+      pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+        var pages = Array.from(Array(pdf.numPages).keys());
+        return Promise.all(pages.map(function(num) {
+          return pdf.getPage(num + 1);
+        }));
+      }).then(function(pages) {
+        
+        var iframe = document.getElementById('pdf-iframe');
+        canvasElements = pages.map(function(page) {
+            var canvas = document.createElement('canvas');
+            console.log(iframe);
+            var scale = Math.min(iframe.clientWidth / page.getViewport({scale: 1}).width, iframe.clientHeight / page.getViewport({scale: 1}).height);
+            var viewport = page.getViewport({scale: scale * 1.3});
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            page.render({canvasContext: canvas.getContext('2d'), viewport: viewport}).promise.then(function() {});
+            return canvas;
+        });
+        
+        var doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write("<html><body></body></html>");
+        canvasElements.forEach(function(canvas) {
+          doc.body.appendChild(canvas);
+        });
+        doc.close();
+      });
+    };
+    
+    fileReader.readAsArrayBuffer(file);
+  });
+
+
+/** IMPORTANT: This only takes screenshot of first page */
+const shotImage = () => {
+    // Get the iframe element
+    const iframe = document.querySelector('#pdf-iframe');
+    
+    console.log(canvasElements);
+
+    // Use html2canvas library to create a canvas element from the iframe
+    html2canvas(canvasElements[0]).then(function(canvas) {
+        // Create an image element from the canvas
+        //const img = document.createElement('img');
+        current_image = canvas.toDataURL();
+        console.log(current_image);
+        changePenType(3);
+        have_file = true;
+        changeInteractiveTool(0);
+    });
+
+    /*
+    const pdf_iframe = document.getElementById('pdf-iframe');
+    const pdfWindow = pdf_iframe.contentWindow;
+    const pdf_iframeDocument = pdfWindow.document;
+    const pdf_iframeBody = pdf_iframeDocument.body;
+  
+    const temp_canvas = document.createElement('canvas');
+    temp_canvas.width = pdf_iframeBody.offsetWidth;
+    temp_canvas.height = pdf_iframeBody.offsetHeight;
+  
+    const pdf_context = temp_canvas.getContext('2d');
+  
+    pdf_context.drawImage(pdf_iframeBody, 0, 0);
+
+    const image = PIXI.Sprite.from(temp_canvas);
+
+    stage.addChild(image);*/
+}
+
+document.shotImage = shotImage;
