@@ -9,7 +9,7 @@ readme = "README.md"
 start = "tutorium.main:start"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 fastapi = "^0.95.1"
 uvicorn = "^0.22.0"
 python-dotenv = "^1.0.0"
