@@ -195,12 +195,22 @@ function onCanvasScroll(event) {
     const delta = Math.sign(event.deltaY) * SCALE_CONST;
 
     // Do something with the scroll direction
-    var middlePoint = transformPoint(0, 0);
-    console.log(middlePoint);
+    console.log(app.view.width);
+
+    var middlePoint = transformPoint(app.view.width / 2, app.view.height / 2);
+    console.log(stage.position);
     console.log(canvas_scale);
+
+    const prev_scale = canvas_scale;
 
     stage.scale.set(stage.scale.x * (1 - delta));
     canvas_scale = stage.scale.x;
+
+    const translation = {x: middlePoint.x * (canvas_scale - prev_scale), y: middlePoint.y * (canvas_scale - prev_scale)}
+
+    canvas_translation = {x: canvas_translation.x + translation.x, y: canvas_translation.y + translation.y};
+    stage.position.set(-canvas_translation.x, -canvas_translation.y);
+
 
     /*var newMiddlePoint = transformPoint(0,0);
 
