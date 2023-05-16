@@ -20,6 +20,7 @@ import { Stack } from "./pages/Stack";
 import { Meetings } from "./pages/Meetings";
 import Tutor from "./pages/Tutor";
 import { UserTypeProvider } from "./utils/UserTypeContext";
+import { Canvas } from "./pages/Canvas";
 
 const clerk_pub_key = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -104,6 +105,20 @@ function ClerkProviderWithRoutes() {
                   <SignedOut>
                     <RedirectToSignIn />
                   </SignedOut>
+                </>
+              }
+            />
+
+            <Route
+              path="/canvas"
+              element={
+                <>
+                  {/* <SignedIn> */}
+                  <Canvas />
+                  {/* </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut> */}
                 </>
               }
             />

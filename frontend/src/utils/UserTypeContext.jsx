@@ -6,8 +6,15 @@ export function UserTypeProvider({ children }) {
   const [isTutor, setIsTutor] = useState(null);
   const [typeLoading, setTypeLoading] = useState(true);
   const { getToken } = useAuth();
+  // get user
+  const { user } = useAuth();
 
   useEffect(() => {
+    // is signed in?
+    if (!user) {
+      setTypeLoading(false);
+      return;
+    }
     setTypeLoading(true);
     const fetchTutorStatus = async () => {
       const token = await getToken();
