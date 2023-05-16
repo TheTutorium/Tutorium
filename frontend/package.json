@@ -1,0 +1,50 @@
+{
+  "name": "tutorium",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@clerk/clerk-react": "^4.15.4",
+    "@clerk/themes": "^1.6.4",
+    "@radix-ui/react-alert-dialog": "^1.0.3",
+    "@radix-ui/react-avatar": "^1.0.2",
+    "@radix-ui/react-dialog": "^1.0.3",
+    "@radix-ui/react-dropdown-menu": "^2.0.4",
+    "@radix-ui/react-hover-card": "^1.0.5",
+    "@radix-ui/react-navigation-menu": "^1.1.2",
+    "@radix-ui/react-popover": "^1.0.5",
+    "@radix-ui/react-tabs": "^1.0.3",
+    "@tailwindcss/typography": "github:tailwindcss/typography",
+    "class-variance-authority": "^0.6.0",
+    "clsx": "^1.2.1",
+    "dotenv": "^16.0.3",
+    "lucide-react": "^0.211.0",
+    "moment": "^2.29.4",
+    "react": "^18.2.0",
+    "react-avatar": "^5.0.3",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.8.0",
+    "react-router-dom": "^6.11.1",
+    "tailwind-merge": "^1.12.0",
+    "tailwindcss-animate": "^1.0.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react": "^4.0.0",
+    "autoprefixer": "^10.4.14",
+    "eslint": "^8.38.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.3.4",
+    "postcss": "^8.4.23",
+    "tailwindcss": "^3.3.2",
+    "vite": "^4.3.2"
+  }
+}
