@@ -2,6 +2,8 @@
 
 //const LeastSquares = require("least-squares");
 
+var history = "";
+
 const maxPointForBezierCurve = 50;
 
 const CHECK_STEPS = 5;
@@ -58,6 +60,7 @@ penColorSelect.addEventListener("change", () => {
 });
 
 
+
 // get references to the pen-size input and the "Sample Text" element
 const textSizeInput = document.getElementById("text-size");
 const sampleTextPointer = document.getElementById("sample-text");
@@ -73,8 +76,7 @@ textSizeInput.addEventListener("input", () => {
   sampleTextPointer.style.fontSize = fontSize;
 
   if(writing_on_board){
-    otherPeer.send(
-        currentPenType +
+    const mess = currentPenType +
         "|" +
         currentZIndex +
         "|" +
@@ -86,8 +88,11 @@ textSizeInput.addEventListener("input", () => {
         "|" +
         p_text.x +
         "|" +
-        p_text.y
+        p_text.y;
+    otherPeer.send(
+        mess
     );
+    history += mess + "\n";
     writing_on_board = false;
   }
 
@@ -103,8 +108,7 @@ textColorSelect.addEventListener("change", () => {
     sampleTextPointer.style.color = fontColor;
 
     if(writing_on_board){
-        otherPeer.send(
-            currentPenType +
+        const mess = currentPenType +
             "|" +
             currentZIndex +
             "|" +
@@ -116,8 +120,14 @@ textColorSelect.addEventListener("change", () => {
             "|" +
             p_text.x +
             "|" +
-            p_text.y
+            p_text.y;
+
+        otherPeer.send(
+            mess
         );
+
+        history += mess + "\n";
+
         writing_on_board = false;
       }
 
@@ -291,6 +301,10 @@ peer.on("connection", (conn) => {
             let tempPenType = parseInt(splittedMessage[0]);
             currentZIndex = parseInt(splittedMessage[1]);
 
+            if(tempPenType >= 0){
+                history += data + "\n";
+            }
+
             if(tempPenType == 0){ // Pen
                 let initX = parseFloat(splittedMessage[2]);
                 let initY = parseFloat(splittedMessage[3]);
@@ -445,6 +459,10 @@ let connectToPeer = () => {
 
             let tempPenType = parseInt(splittedMessage[0]);
             currentZIndex = parseInt(splittedMessage[1]);
+
+            if(tempPenType >= 0){
+                history += data + "\n";
+            }
 
             if(tempPenType == 0){ // Pen
                 let initX = parseFloat(splittedMessage[2]);
@@ -643,6 +661,33 @@ window.changeInteractiveTool = changeInteractiveTool;
 
 // Whiteboard Part
 
+var save_count = 0;
+
+const saveWhiteboard = () => {
+
+    const element = document.createElement('a');
+  
+    // Set the text content and file name
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(history));
+    element.setAttribute('download', "save_" + save_count + ".wb");
+
+    // Hide the anchor element
+    element.style.display = 'none';
+    
+    // Append the anchor element to the document
+    document.body.appendChild(element);
+    
+    // Programmatically click the anchor element
+    element.click();
+    
+    // Remove the anchor element from the document
+    document.body.removeChild(element);
+
+    save_count++;
+}
+
+window.saveWhiteboard = saveWhiteboard;
+
 let currentZIndex = 0;
 let currentPenType = 0;
 
@@ -808,8 +853,7 @@ const onMouseMove = (e) => {
                 //-------------------
                 //Send curve info
                 if (currentPenType === 0) {
-                    otherPeer.send(
-                        currentPenType +
+                    const mess = currentPenType +
                         "|" +
                         currentZIndex +
                         "|" +
@@ -831,11 +875,13 @@ const onMouseMove = (e) => {
                         "|" +
                         pen_size +
                         "|" +
-                        pen_color
-                    );
-                } else if (currentPenType === 1) {
+                        pen_color;
                     otherPeer.send(
-                        currentPenType +
+                        mess
+                    );
+                    history += mess + "\n";
+                } else if (currentPenType === 1) {
+                    const mess = currentPenType +
                         "|" +
                         currentZIndex +
                         "|" +
@@ -855,8 +901,13 @@ const onMouseMove = (e) => {
                         "|" +
                         control3.y +
                         "|" +
-                        eraser_size
+                        eraser_size;
+
+                    otherPeer.send(
+                        mess
                     );
+
+                    history += mess + "\n";
                 }
                 
                 //delete previous drawing
@@ -913,8 +964,7 @@ const onMouseDown = (e) => {
 
     if(currentPenType != 2 && writing_on_board){
         writing_on_board = false;
-        otherPeer.send(
-            currentPenType +
+        const mess = currentPenType +
             "|" +
             currentZIndex +
             "|" +
@@ -926,8 +976,11 @@ const onMouseDown = (e) => {
             "|" +
             p_text.x +
             "|" +
-            p_text.y
+            p_text.y;
+        otherPeer.send(
+            mess
         );
+        history += mess + "\n";
     }
 
     sprite = new PIXI.Graphics();
@@ -937,8 +990,7 @@ const onMouseDown = (e) => {
         sprite.lineStyle(eraser_size, 0xffffff, 1);
     } else if (currentPenType === 2){ // Typing
         if(writing_on_board == true){
-            otherPeer.send(
-                currentPenType +
+            const mess = currentPenType +
                 "|" +
                 currentZIndex +
                 "|" +
@@ -950,8 +1002,11 @@ const onMouseDown = (e) => {
                 "|" +
                 p_text.x +
                 "|" +
-                p_text.y
+                p_text.y;
+            otherPeer.send(
+                mess
             );
+            history += mess + "\n";
         }
         console.log("Typing");
         const mouseX = e.clientX - app.renderer.view.offsetLeft;
@@ -992,8 +1047,7 @@ const onMouseDown = (e) => {
             stage.addChild(sprite);
 
 
-            otherPeer.send(
-                currentPenType +
+            const mess = currentPenType +
                 "|" +
                 currentZIndex +
                 "|" + 
@@ -1001,8 +1055,13 @@ const onMouseDown = (e) => {
                 "|" +
                 relativePos.x +
                 "|" +
-                relativePos.y
+                relativePos.y;
+
+            otherPeer.send(
+                mess
             );
+
+            history += mess + "\n";
 
 
         }
@@ -1047,8 +1106,7 @@ const onMouseUp = (e) => {
         //-------------------
         //Send curve info
         if (currentPenType === 0) {
-            otherPeer.send(
-                currentPenType +
+            const mess = currentPenType +
                 "|" +
                 currentZIndex +
                 "|" +
@@ -1070,11 +1128,13 @@ const onMouseUp = (e) => {
                 "|" +
                 pen_size +
                 "|" +
-                pen_color
-            );
-        } else if (currentPenType === 1) {
+                pen_color;
             otherPeer.send(
-                currentPenType +
+                mess
+            );
+            history += mess + "\n";
+        } else if (currentPenType === 1) {
+            const mess = currentPenType +
                 "|" +
                 currentZIndex +
                 "|" +
@@ -1094,8 +1154,13 @@ const onMouseUp = (e) => {
                 "|" +
                 control3.y +
                 "|" +
-                eraser_size
+                eraser_size;
+
+            otherPeer.send(
+                mess
             );
+
+            history += mess + "\n";
         }
         
         //delete previous drawing
@@ -1115,8 +1180,8 @@ document.addEventListener("keydown", (event) => {
         console.log(event.key);
         if(event.key.localeCompare("Enter") === 0){
             //Send Text
-            otherPeer.send(
-                currentPenType +
+
+            const mess = currentPenType +
                 "|" +
                 currentZIndex +
                 "|" +
@@ -1128,9 +1193,12 @@ document.addEventListener("keydown", (event) => {
                 "|" +
                 p_text.x +
                 "|" +
-                p_text.y
+                p_text.y;
+            otherPeer.send(
+                mess
             );
 
+            history += mess + "\n";
 
             writing_on_board = false;
         }
