@@ -258,6 +258,8 @@ let messagesEl = document.querySelector(".messages");
 let peerIdEl = document.querySelector("#connect-to-peer");
 let videoEl = document.querySelector(".remote-video");
 let currentCall = null;
+let screenStream = null;
+
 
 let logMessage = (message) => {
     let newMessage = document.createElement("div");
@@ -450,6 +452,9 @@ let connectToPeer = () => {
 
     let conn = peer.connect(peerId);
     otherPeer = conn;
+
+    document.getElementById("share-screen-button").classList.remove("hidden");
+
     conn.on("data", (data) => {
         if (!connectionInitiated) {
             connectionInitiated = true;
@@ -609,10 +614,39 @@ let disconnectFromPeer = () => {
     logMessage("Disconnecting from peer");
     currentCall.close();
     peer.disconnect();
+
+    if (screenStream) {
+        screenStream.getTracks().forEach((track) => track.stop());
+        screenStream = null;
+    }
 };
+
+let shareScreen = () => {
+    navigator.mediaDevices
+      .getDisplayMedia({ video: true })
+      .then((screenStream) => {
+        const videoTrack = screenStream.getVideoTracks()[0];
+        const sender = currentCall.peerConnection.getSenders().find((s) => s.track.kind === videoTrack.kind);
+        sender.replaceTrack(videoTrack);
+  
+        // Create a new video element for the shared screen
+        const sharedScreenVideo = document.createElement("video");
+        sharedScreenVideo.srcObject = screenStream;
+        sharedScreenVideo.autoplay = true;
+        sharedScreenVideo.classList.add("shared-screen");
+  
+        // Append the shared screen video element to the HTML body
+        document.body.appendChild(sharedScreenVideo);
+      })
+      .catch((error) => {
+        console.error("Error sharing screen:", error);
+      });
+  };
+  
 
 window.connectToPeer = connectToPeer;
 window.disconnectFromPeer = disconnectFromPeer;
+window.shareScreen = shareScreen;
 
 /*navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
